@@ -13,7 +13,10 @@
   
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#d93d3d">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
+
 <body>
 
   <header class="bg-white py-3 border-bottom sticky-top d-none d-md-block">
@@ -36,10 +39,13 @@
         <div class="logo d-flex align-items-center">
             <i class="bi bi-b-circle-fill fs-2 text-danger me-2"></i>
             <span class="fs-4 fw-bold text-dark">Onde tem?</span>
-          </div>
-      <div class="search-icon fs-3 text-muted">
-          <i class="bi bi-search"></i>
-      </div>
+        </div>
+        <div class="search-container-mobile d-flex align-items-center">
+          <input type="search" id="input-busca-mobile" class="form-control rounded-pill d-none" placeholder="Buscar...">
+            <div class="search-icon fs-3 text-muted ms-2" id="btn-lupa-mobile" style="cursor: pointer;">
+              <i class="bi bi-search"></i>
+            </div>
+        </div>
     </div>
   </header>
 
@@ -150,6 +156,48 @@
       </div>
     </div>
   </section>
+  <div class="modal fade" id="modalAgendamento" tabindex="-1" aria-labelledby="modalAgendamentoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAgendamentoLabel">Finalizar Agendamento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAgendamento">
+          <div class="mb-3">
+            <label class="form-label">Escolha o dia:</label>
+            <input type="date" class="form-control" id="dataAgendamento" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Horário disponível:</label>
+            <select class="form-select" id="horaAgendamento" required>
+              <option value="">Selecione...</option>
+              <option>09:00</option>
+              <option>10:00</option>
+              <option>14:00</option>
+              <option>16:00</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Forma de Pagamento:</label>
+            <select class="form-select" id="metodoPagamento" required>
+              <option value="pix">Pix</option>
+              <option value="cartao">Cartão de Crédito</option>
+              <option value="local">Pagar no Estabelecimento</option>
+            </select>
+          </div>
+
+          <hr>
+          <div id="statusPagamento" class="text-center small mb-2"></div>
+          <button type="submit" class="btn btn-danger w-100 rounded-pill">Confirmar e Pagar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
 
   <nav class="fixed-bottom bg-white d-md-none border-top py-2 bottom-nav">
     <div class="container-fluid d-flex justify-content-around text-center">
@@ -171,9 +219,25 @@
       </a>
     </div>
   </nav>
+  <div id="map"></div>
+    <script>
+        // 4. Inicializar o mapa (latitude, longitude, zoom)
+        var map = L.map('map').setView([-22.90, -42.02], 13);
+        
+        // 5. Adicionar a camada de azulejos (OpenStreetMap)
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+        
+        // 6. Adicionar um marcador
+        L.marker([-22.90259571044483, -42.471591900326096]).addTo(map)
+            .bindPopup('Saquarema, Brasil')
+            .openPopup();
+    </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
   <script src="script.js"></script>
+  
 </body>
 </html>

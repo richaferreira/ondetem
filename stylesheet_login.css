@@ -1,0 +1,88 @@
+body {
+    background-color: #553a73;
+    display: flex;
+    justify-content: center;
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+   
+}
+
+
+.container {
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.096);
+    border-radius: 20px;
+    margin: 72px;
+    width: 25rem;
+    height: 30rem;
+    backdrop-filter: blur(2px);
+    border: solid white 1px;
+
+}
+.main{
+    display: grid;
+    justify-content: center;
+
+}
+
+.logo {
+    size: 10px 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.textos{    
+
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+.botao_PF {
+    display: flex;
+    justify-content: center;
+    text-decoration: none;
+
+}
+
+.PF_PJ {
+    margin-bottom: 5px;
+}
+
+.acess, input {
+    display: grid;
+    justify-content: center;
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    width: 20rem;
+    height: 2rem;
+    gap: 10px;
+    border-radius: 5px;
+    border: solid white 0.5px;
+
+
+
+}
+
+.acess button {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    height: 3rem;
+    border-radius: 5px;
+    border: none;
+    background-color: white;
+    color: #553a73;
+}
+
+.acess button:hover {
+    cursor: pointer;
+    background-color: #553a73;
+    color: white;
+    border: solid 1px;
+}
