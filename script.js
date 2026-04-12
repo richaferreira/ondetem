@@ -1,218 +1,482 @@
-// 1. Registro do Service Worker para PWA
+/**
+ * script.js - Script principal do projeto "Onde Tem?"
+ * Gerencia interatividade, filtros, mapa e persistência de dados
+ */
+
+// ============================================
+// 1. REGISTRO DO SERVICE WORKER PARA PWA
+// ============================================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
-            .then(reg => console.log('SW registrado:', reg.scope))
-            .catch(err => console.log('Erro SW:', err));
+            .then(reg => console.log('✓ Service Worker registrado:', reg.scope))
+            .catch(err => console.log('✗ Erro ao registrar SW:', err));
     });
 }
 
-// Dados dos estabelecimentos (para referência no mapa e filtros)
-const estabelecimentos = [
-    {
-        id: 0,
-        nome: "Studio Bella Donna",
-        lat: -22.9345,
-        lng: -42.4951,
-        categorias: ["Cabelo", "Unhas", "Sobrancelhas"]
-    },
-    {
-        id: 1,
-        nome: "Clínica Estética Flores",
-        lat: -22.9350,
-        lng: -42.4945,
-        categorias: ["Rosto", "Depilação", "Massagem"]
-    },
-    {
-        id: 2,
-        nome: "Espaço Glow",
-        lat: -22.9340,
-        lng: -42.4955,
-        categorias: ["Unhas", "Sobrancelhas", "Rosto"]
-    }
-];
+// ============================================
+// 2. VARIÁVEIS GLOBAIS
+// ============================================
+let filtroAtivo = null;
+let mapaInstancia = null;
+let marcadoresEstabelecimentos = [];
+let estabelecimentoSelecionado = null;
 
+// ============================================
+// 3. INICIALIZAÇÃO DO DOCUMENTO
+// ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    // --- SELEÇÃO DE ELEMENTOS ---
+    console.log('✓ DOM carregado - Iniciando aplicação');
+    
+    // Inicializar componentes
+    inicializarBusca();
+    inicializarCategorias();
+    inicializarModal();
+    inicializarFormulario();
+    inicializarMapa();
+    
+    console.log('✓ Aplicação inicializada com sucesso');
+});
+
+// ============================================
+// 4. BUSCA E FILTRO POR TEXTO
+// ============================================
+function inicializarBusca() {
+    const inputDesktop = document.querySelector('.search-bar input');
     const btnLupaMobile = document.getElementById('btn-lupa-mobile');
     const inputMobile = document.getElementById('input-busca-mobile');
-    const inputDesktop = document.querySelector('.search-bar input'); 
-    const cards = document.querySelectorAll('.listings .row > div');
-    const categoryItems = document.querySelectorAll('.category-item');
-    
-    const modalElement = document.getElementById('modalAgendamento');
-    const bModal = new bootstrap.Modal(modalElement);
-    const form = document.getElementById('formAgendamento');
-    const statusPagamento = document.getElementById('statusPagamento');
 
-    // --- VARIÁVEL PARA RASTREAR FILTRO ATIVO ---
-    let filtroAtivo = null;
-
-    // --- LÓGICA DE BUSCA (FILTRO POR TEXTO) ---
-    function filtrarCards(termo) {
-        const searchTerm = termo.toLowerCase();
-        cards.forEach(card => {
-            const title = card.querySelector('.card-title').innerText.toLowerCase();
-            const services = card.querySelector('.card-text').innerText.toLowerCase();
-            const match = title.includes(searchTerm) || services.includes(searchTerm);
-            card.style.display = match ? "block" : "none";
+    // Busca no desktop
+    if (inputDesktop) {
+        inputDesktop.addEventListener('input', (e) => {
+            filtroAtivo = null;
+            removerFiltrosCategorias();
+            filtrarPorTexto(e.target.value);
         });
     }
 
-    // --- LÓGICA DE FILTRO POR CATEGORIA ---
-    function filtrarPorCategoria(categoria) {
-        cards.forEach((card, index) => {
-            const estabelecimento = estabelecimentos[index];
-            const match = estabelecimento && estabelecimento.categorias.includes(categoria);
-            card.style.display = match ? "block" : "none";
+    // Busca no mobile
+    if (inputMobile) {
+        inputMobile.addEventListener('input', (e) => {
+            filtroAtivo = null;
+            removerFiltrosCategorias();
+            filtrarPorTexto(e.target.value);
         });
     }
 
-    // --- EVENT LISTENERS PARA BUSCA ---
-    if(inputDesktop) inputDesktop.addEventListener('input', (e) => {
-        filtroAtivo = null;
-        categoryItems.forEach(item => item.classList.remove('active'));
-        filtrarCards(e.target.value);
-    });
-    
-    if(inputMobile) inputMobile.addEventListener('input', (e) => {
-        filtroAtivo = null;
-        categoryItems.forEach(item => item.classList.remove('active'));
-        filtrarCards(e.target.value);
-    });
-
-    if(btnLupaMobile) {
+    // Toggle da lupa no mobile
+    if (btnLupaMobile) {
         btnLupaMobile.addEventListener('click', () => {
             inputMobile.classList.toggle('d-none');
             inputMobile.classList.toggle('ativo');
-            inputMobile.focus();
+            if (!inputMobile.classList.contains('d-none')) {
+                inputMobile.focus();
+            }
         });
     }
+}
 
-    // --- EVENT LISTENERS PARA CATEGORIAS ---
+function filtrarPorTexto(termo) {
+    const cards = document.querySelectorAll('.listings .row > div');
+    const searchTerm = termo.toLowerCase();
+    let resultados = 0;
+
+    cards.forEach((card, index) => {
+        const estabelecimento = ESTABELECIMENTOS[index];
+        if (!estabelecimento) return;
+
+        const match = 
+            estabelecimento.nome.toLowerCase().includes(searchTerm) ||
+            estabelecimento.descricao.toLowerCase().includes(searchTerm) ||
+            estabelecimento.categorias.some(cat => cat.toLowerCase().includes(searchTerm));
+
+        if (match) {
+            card.style.display = "block";
+            card.style.animation = "slideIn 0.3s ease";
+            resultados++;
+        } else {
+            card.style.display = "none";
+        }
+    });
+
+    // Mostrar mensagem se não houver resultados
+    mostrarMensagemResultados(resultados, termo);
+}
+
+function mostrarMensagemResultados(resultados, termo) {
+    let mensagem = document.getElementById('mensagem-resultados');
+    
+    if (!mensagem) {
+        mensagem = document.createElement('div');
+        mensagem.id = 'mensagem-resultados';
+        mensagem.className = 'alert alert-info mt-3';
+        document.querySelector('.listings').appendChild(mensagem);
+    }
+
+    if (resultados === 0 && termo) {
+        mensagem.innerHTML = `<i class="bi bi-search"></i> Nenhum resultado encontrado para "${termo}"`;
+        mensagem.style.display = 'block';
+    } else {
+        mensagem.style.display = 'none';
+    }
+}
+
+// ============================================
+// 5. FILTRO POR CATEGORIAS
+// ============================================
+function inicializarCategorias() {
+    const categoryItems = document.querySelectorAll('.category-item');
+
     categoryItems.forEach(item => {
         item.addEventListener('click', () => {
             const categoria = item.querySelector('p').innerText;
             
-            if(filtroAtivo === categoria) {
-                // Se clicar novamente, remove o filtro
+            if (filtroAtivo === categoria) {
+                // Remover filtro se clicar novamente
                 filtroAtivo = null;
                 item.classList.remove('active');
-                cards.forEach(card => card.style.display = "block");
+                mostrarTodosCards();
+                console.log('✓ Filtro removido');
             } else {
-                // Aplica novo filtro
+                // Aplicar novo filtro
                 filtroAtivo = categoria;
-                categoryItems.forEach(c => c.classList.remove('active'));
+                removerFiltrosCategorias();
                 item.classList.add('active');
                 filtrarPorCategoria(categoria);
+                console.log('✓ Filtro aplicado:', categoria);
             }
         });
-    });
 
-    // --- LÓGICA DO MODAL (ABRIR E PREENCHER) ---
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-danger') && e.target.closest('.card-body')) {
-            const btn = e.target;
-            const nomeLocal = btn.closest('.card-body').querySelector('.card-title').innerText;
-            document.getElementById('modalAgendamentoLabel').innerText = `Agendar em: ${nomeLocal}`;
-            bModal.show();
-        }
-    });
-
-    // --- LÓGICA DE PAGAMENTO (ENVIO PARA API) ---
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const btnSubmit = form.querySelector('button[type="submit"]');
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
-        statusPagamento.innerHTML = "Conectando ao servidor...";
-
-        const dadosAgendamento = {
-            id: Date.now(),
-            local: document.getElementById('modalAgendamentoLabel').innerText.replace('Agendar em: ', ''),
-            data: document.getElementById('dataAgendamento').value,
-            hora: document.getElementById('horaAgendamento').value,
-            pagamento: document.getElementById('metodoPagamento').value,
-            timestamp: new Date().toLocaleString('pt-BR')
-        };
-
-        try {
-            // Chamada para o JSONPlaceholder (API Fake)
-            const resposta = await fetch('https://jsonplaceholder.typicode.com/posts', {
-                method: 'POST',
-                body: JSON.stringify(dadosAgendamento),
-                headers: { 'Content-type': 'application/json; charset=UTF-8' }
-            });
-
-            if(resposta.ok) {
-                const resultado = await resposta.json();
-                
-                // Salvar agendamento no localStorage
-                let agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
-                agendamentos.push(dadosAgendamento);
-                localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
-                
-                statusPagamento.innerHTML = '<b class="text-success">Pagamento Aprovado!</b>';
-                
-                setTimeout(() => {
-                    bModal.hide();
-                    form.reset();
-                    statusPagamento.innerHTML = '';
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerText = 'Confirmar e Pagar';
-                    alert("Sucesso! Agendamento #" + resultado.id + " confirmado em " + dadosAgendamento.local + ".");
-                }, 2000);
-            }
-        } catch (erro) {
-            statusPagamento.innerHTML = '<b class="text-danger">Erro no processamento.</b>';
-            btnSubmit.disabled = false;
-            btnSubmit.innerText = 'Confirmar e Pagar';
-        }
-    });
-
-    // --- INICIALIZAR MAPA ---
-    inicializarMapa();
-});
-
-// --- FUNÇÃO PARA INICIALIZAR O MAPA ---
-function inicializarMapa() {
-    const map = L.map('map');
-
-    // Adicionar a camada de azulejos (OpenStreetMap)
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-    // Localizar a pessoa
-    map.locate({ setView: true, maxZoom: 16 });
-
-    // Evento: Quando a localização é encontrada
-    map.on('locationfound', function(e) {
-        L.marker(e.latlng).addTo(map)
-            .bindPopup("Você está aqui!")
-            .openPopup();
-        
-        L.circle(e.latlng, e.accuracy).addTo(map);
-
-        // Adicionar marcadores dos estabelecimentos
-        estabelecimentos.forEach(est => {
-            L.marker([est.lat, est.lng]).addTo(map)
-                .bindPopup(`<b>${est.nome}</b><br>${est.categorias.join(', ')}`);
+        // Adicionar efeito hover
+        item.addEventListener('mouseenter', () => {
+            item.style.transform = 'scale(1.05)';
         });
-    });
 
-    // Evento: Caso a pessoa negue o GPS ou ocorra erro
-    map.on('locationerror', function(e) {
-        console.warn("Localização não disponível. Usando Saquarema como padrão.");
-        
-        // Fallback: Se der erro, volta para o centro de Saquarema
-        map.setView([-22.9345, -42.4951], 13);
-
-        // Adicionar marcadores dos estabelecimentos mesmo sem localização
-        estabelecimentos.forEach(est => {
-            L.marker([est.lat, est.lng]).addTo(map)
-                .bindPopup(`<b>${est.nome}</b><br>${est.categorias.join(', ')}`);
+        item.addEventListener('mouseleave', () => {
+            item.style.transform = 'scale(1)';
         });
     });
 }
+
+function filtrarPorCategoria(categoria) {
+    const cards = document.querySelectorAll('.listings .row > div');
+    let resultados = 0;
+
+    cards.forEach((card, index) => {
+        const estabelecimento = ESTABELECIMENTOS[index];
+        if (!estabelecimento) return;
+
+        const match = estabelecimento.categorias.includes(categoria);
+
+        if (match) {
+            card.style.display = "block";
+            card.style.animation = "slideIn 0.3s ease";
+            resultados++;
+        } else {
+            card.style.display = "none";
+        }
+    });
+
+    mostrarMensagemResultados(resultados, categoria);
+}
+
+function removerFiltrosCategorias() {
+    document.querySelectorAll('.category-item').forEach(item => {
+        item.classList.remove('active');
+    });
+}
+
+function mostrarTodosCards() {
+    document.querySelectorAll('.listings .row > div').forEach(card => {
+        card.style.display = "block";
+        card.style.animation = "slideIn 0.3s ease";
+    });
+    
+    const mensagem = document.getElementById('mensagem-resultados');
+    if (mensagem) mensagem.style.display = 'none';
+}
+
+// ============================================
+// 6. MODAL E AGENDAMENTO
+// ============================================
+function inicializarModal() {
+    const modalElement = document.getElementById('modalAgendamento');
+    const bModal = new bootstrap.Modal(modalElement);
+
+    // Delegação de evento para botões "Agendar"
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-danger') && e.target.closest('.card-body')) {
+            const btn = e.target;
+            const cardBody = btn.closest('.card-body');
+            const nomeLocal = cardBody.querySelector('.card-title').innerText;
+            const indexCard = Array.from(document.querySelectorAll('.listings .row > div')).findIndex(
+                card => card.querySelector('.card-title').innerText === nomeLocal
+            );
+
+            if (indexCard !== -1) {
+                estabelecimentoSelecionado = ESTABELECIMENTOS[indexCard];
+                document.getElementById('modalAgendamentoLabel').innerText = `Agendar em: ${nomeLocal}`;
+                preencherHorariosDisponiveis();
+                bModal.show();
+                console.log('✓ Modal aberto para:', nomeLocal);
+            }
+        }
+    });
+}
+
+function preencherHorariosDisponiveis() {
+    const selectHora = document.getElementById('horaAgendamento');
+    selectHora.innerHTML = '<option value="">Selecione...</option>';
+
+    HORARIOS_DISPONIVEIS.forEach(horario => {
+        const option = document.createElement('option');
+        option.value = horario;
+        option.textContent = horario;
+        selectHora.appendChild(option);
+    });
+}
+
+// ============================================
+// 7. FORMULÁRIO E PAGAMENTO
+// ============================================
+function inicializarFormulario() {
+    const form = document.getElementById('formAgendamento');
+    const statusPagamento = document.getElementById('statusPagamento');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await processarAgendamento(form, statusPagamento);
+    });
+}
+
+async function processarAgendamento(form, statusPagamento) {
+    const btnSubmit = form.querySelector('button[type="submit"]');
+    const dataAgendamento = document.getElementById('dataAgendamento').value;
+    const horaAgendamento = document.getElementById('horaAgendamento').value;
+    const metodoPagamento = document.getElementById('metodoPagamento').value;
+
+    // Validações
+    if (!dataAgendamento || !horaAgendamento || !metodoPagamento) {
+        statusPagamento.innerHTML = '<b class="text-danger"><i class="bi bi-exclamation-circle"></i> Preencha todos os campos!</b>';
+        return;
+    }
+
+    // Validar data (não pode ser no passado)
+    const dataSelecionada = new Date(dataAgendamento);
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    if (dataSelecionada < hoje) {
+        statusPagamento.innerHTML = '<b class="text-danger"><i class="bi bi-exclamation-circle"></i> Selecione uma data futura!</b>';
+        return;
+    }
+
+    // Desabilitar botão e mostrar progresso
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+    statusPagamento.innerHTML = '<i class="bi bi-hourglass-split"></i> Conectando ao servidor...';
+
+    const dadosAgendamento = {
+        id: Date.now(),
+        estabelecimento: estabelecimentoSelecionado.nome,
+        estabelecimentoId: estabelecimentoSelecionado.id,
+        data: dataAgendamento,
+        hora: horaAgendamento,
+        pagamento: metodoPagamento,
+        timestamp: new Date().toLocaleString('pt-BR'),
+        status: 'confirmado'
+    };
+
+    try {
+        // Simular chamada à API
+        const resposta = await fetch('https://jsonplaceholder.typicode.com/posts', {
+            method: 'POST',
+            body: JSON.stringify(dadosAgendamento),
+            headers: { 'Content-type': 'application/json; charset=UTF-8' }
+        });
+
+        if (resposta.ok) {
+            const resultado = await resposta.json();
+
+            // Salvar no localStorage
+            let agendamentos = JSON.parse(localStorage.getItem(STORAGE_KEYS.agendamentos)) || [];
+            agendamentos.push(dadosAgendamento);
+            localStorage.setItem(STORAGE_KEYS.agendamentos, JSON.stringify(agendamentos));
+
+            // Mostrar sucesso
+            statusPagamento.innerHTML = '<b class="text-success"><i class="bi bi-check-circle"></i> Pagamento Aprovado!</b>';
+            
+            setTimeout(() => {
+                const modalElement = document.getElementById('modalAgendamento');
+                const bModal = bootstrap.Modal.getInstance(modalElement);
+                bModal.hide();
+                form.reset();
+                statusPagamento.innerHTML = '';
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = 'Confirmar e Pagar';
+
+                // Mostrar notificação de sucesso
+                mostrarNotificacao(
+                    `Agendamento confirmado em ${dadosAgendamento.estabelecimento}`,
+                    'success'
+                );
+                
+                console.log('✓ Agendamento realizado:', dadosAgendamento);
+            }, 2000);
+        }
+    } catch (erro) {
+        statusPagamento.innerHTML = '<b class="text-danger"><i class="bi bi-x-circle"></i> Erro no processamento.</b>';
+        console.error('✗ Erro ao processar agendamento:', erro);
+        
+        setTimeout(() => {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = 'Confirmar e Pagar';
+        }, 2000);
+    }
+}
+
+// ============================================
+// 8. MAPA E MARCADORES
+// ============================================
+function inicializarMapa() {
+    console.log('✓ Inicializando mapa...');
+    
+    mapaInstancia = L.map('map');
+
+    // Adicionar camada de azulejos (OpenStreetMap)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(mapaInstancia);
+
+    // Tentar localizar o usuário
+    mapaInstancia.locate({ setView: true, maxZoom: 16 });
+
+    // Evento: Localização encontrada
+    mapaInstancia.on('locationfound', function(e) {
+        console.log('✓ Localização do usuário encontrada');
+        
+        // Marcador do usuário
+        L.marker(e.latlng, {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            })
+        }).addTo(mapaInstancia)
+            .bindPopup("<b>Você está aqui!</b>")
+            .openPopup();
+        
+        // Círculo de precisão
+        L.circle(e.latlng, e.accuracy, {
+            color: '#2196F3',
+            fillColor: '#2196F3',
+            fillOpacity: 0.1,
+            weight: 2
+        }).addTo(mapaInstancia);
+
+        // Adicionar marcadores dos estabelecimentos
+        adicionarMarcadoresEstabelecimentos();
+    });
+
+    // Evento: Erro na localização
+    mapaInstancia.on('locationerror', function(e) {
+        console.warn('⚠ Localização não disponível. Usando Saquarema como padrão.');
+        
+        // Fallback: Saquarema
+        mapaInstancia.setView(MAPA_CONFIG.coordenada_padrao, MAPA_CONFIG.zoom);
+        
+        // Adicionar marcadores dos estabelecimentos
+        adicionarMarcadoresEstabelecimentos();
+    });
+}
+
+function adicionarMarcadoresEstabelecimentos() {
+    console.log('✓ Adicionando marcadores dos estabelecimentos...');
+    
+    ESTABELECIMENTOS.forEach((est, index) => {
+        // Criar ícone personalizado
+        const icone = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // Criar marcador
+        const marcador = L.marker([est.lat, est.lng], { icon: icone })
+            .addTo(mapaInstancia)
+            .bindPopup(`
+                <div style="width: 200px;">
+                    <b style="color: #553A73;">${est.nome}</b><br>
+                    <small>${est.categorias.join(', ')}</small><br>
+                    <small><i class="bi bi-star-fill" style="color: #ffc107;"></i> ${est.avaliacao}</small><br>
+                    <small>${est.endereco}</small><br>
+                    <small><i class="bi bi-telephone"></i> ${est.telefone}</small>
+                </div>
+            `);
+
+        marcador.on('click', () => {
+            console.log('✓ Marcador clicado:', est.nome);
+        });
+
+        marcadoresEstabelecimentos.push(marcador);
+    });
+
+    console.log('✓ Marcadores adicionados:', marcadoresEstabelecimentos.length);
+}
+
+// ============================================
+// 9. NOTIFICAÇÕES
+// ============================================
+function mostrarNotificacao(mensagem, tipo = 'info') {
+    const notificacao = document.createElement('div');
+    notificacao.className = `alert alert-${tipo} alert-dismissible fade show`;
+    notificacao.role = 'alert';
+    notificacao.style.position = 'fixed';
+    notificacao.style.top = '20px';
+    notificacao.style.right = '20px';
+    notificacao.style.zIndex = '9999';
+    notificacao.style.minWidth = '300px';
+    notificacao.innerHTML = `
+        ${mensagem}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+
+    document.body.appendChild(notificacao);
+
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        notificacao.remove();
+    }, 5000);
+}
+
+// ============================================
+// 10. UTILITÁRIOS
+// ============================================
+
+// Função para formatar data
+function formatarData(data) {
+    return new Date(data).toLocaleDateString('pt-BR');
+}
+
+// Função para formatar moeda
+function formatarMoeda(valor) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(valor);
+}
+
+// Função para obter label do método de pagamento
+function obterLabelPagamento(valor) {
+    const metodo = METODOS_PAGAMENTO.find(m => m.valor === valor);
+    return metodo ? metodo.label : valor;
+}
+
+console.log('✓ Script carregado com sucesso');
