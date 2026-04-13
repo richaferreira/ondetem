@@ -9,6 +9,7 @@ const VAPID_PUBLIC_KEY = 'BNo6E7y9E_v1G9QyXq8zY4Z5R8J2L6m5n4b3v2c1x0z9a8s7d6f5g4
 // 1. Registra o Service Worker ao carregar a página
 if ('serviceWorker' in navigator && 'PushManager' in window) {
     window.addEventListener('load', () => {
+        // Atenção: Certifique-se de que o arquivo realmente se chama 'service-worker.js' na sua pasta raiz
         navigator.serviceWorker.register('/service-worker.js')
             .then(reg => {
                 console.log('✓ SW registrado para Push:', reg.scope);
@@ -42,7 +43,7 @@ function configurarBotao(registration) {
         btnMobile.addEventListener('click', () => handleSubscribe(btnMobile));
     }
 
-    // Verificar se já está inscrito
+    // Verificar se já está inscrito e atualizar os botões de acordo
     registration.pushManager.getSubscription().then(subscription => {
         if (subscription) {
             if (btnDesktop) atualizarBotaoStatus(btnDesktop, true);
@@ -51,6 +52,7 @@ function configurarBotao(registration) {
     });
 }
 
+// Função auxiliar para atualizar o visual do botão
 function atualizarBotaoStatus(btn, inscrito) {
     if (inscrito) {
         btn.disabled = true;
@@ -73,7 +75,7 @@ async function inscreverUsuario(registration) {
         
         console.log('✓ Usuário inscrito no Push:', JSON.stringify(subscription));
         
-        // Enviar 'subscription' para o back-end aqui (simulado)
+        // TODO: Enviar 'subscription' para o back-end aqui
         // await enviarSubscriptionParaServidor(subscription);
         
     } catch (err) {
@@ -84,14 +86,9 @@ async function inscreverUsuario(registration) {
 // Utilitário: converte chave VAPID de Base64 para Uint8Array
 function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
     const raw = window.atob(base64);
-    const outputArray = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; ++i) {
-        outputArray[i] = raw.charCodeAt(i);
-    }
-    return outputArray;
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
 // Função para disparar notificação local (simulação de push)
