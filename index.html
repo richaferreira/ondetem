@@ -6,13 +6,10 @@
   <title>Onde Tem? - Agendamento de Serviços Estéticos</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  
   <link rel="stylesheet" href="style.css">
-  
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#d93d3d">
+  <meta name="theme-color" content="#553A73">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -28,7 +25,10 @@
       <div class="search-bar w-50">
         <input type="search" class="form-control rounded-pill" placeholder="Busque por serviços ou profissionais">
       </div>
-      <div class="header-action">
+      <div class="header-action d-flex align-items-center gap-3">
+        <button id="btn-subscribe" class="btn btn-outline-primary btn-sm rounded-pill">
+          🔔 Notificações
+        </button>
         <button class="btn btn-danger rounded-pill px-4">Login</button>
       </div>
     </div>
@@ -40,8 +40,11 @@
             <i class="bi bi-b-circle-fill fs-2 text-danger me-2"></i>
             <span class="fs-4 fw-bold text-dark">Onde tem?</span>
         </div>
-        <div class="search-container-mobile d-flex align-items-center">
-          <input type="search" id="input-busca-mobile" class="form-control rounded-pill d-none" placeholder="Buscar...">
+        <div class="search-container-mobile d-flex align-items-center gap-2">
+            <button id="btn-subscribe-mobile" class="btn btn-link text-primary p-0">
+              <i class="bi bi-bell"></i>
+            </button>
+            <input type="search" id="input-busca-mobile" class="form-control rounded-pill d-none" placeholder="Buscar...">
             <div class="search-icon fs-3 text-muted ms-2" id="btn-lupa-mobile" style="cursor: pointer;">
               <i class="bi bi-search"></i>
             </div>
@@ -57,14 +60,12 @@
                 <h1 class="display-6 fw-bold">agendado em cliques.</h1>
                 <p class="lead text-muted d-none d-md-block">Encontre os melhores profissionais perto de você.</p>
             </div>
-            <div class="col-md-4 position-relative d-none d-md-block">
-            
+            <div class="col-md-4 position-relative d-none d-md-block"></div>
         </div>
     </div>
   </section>
 
 <!-- Categorias -->
-
   <section class="categories py-4 bg-white">
     <div class="container">
       <div class="categories-wrapper">
@@ -97,7 +98,6 @@
   </section>
 
 <!-- Cards com Salões e Clínicas -->  
-
 <section class="listings py-5 bg-light">
   <div class="container">
     <h2 class="mb-4">Salões e Clínicas em Destaque</h2>
@@ -168,7 +168,6 @@
 </section>
 
 <!-- Modal ao clicar em agendar -->  
-
   <div class="modal fade" id="modalAgendamento" tabindex="-1" aria-labelledby="modalAgendamentoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -213,10 +212,9 @@
   </div>
 
 <!-- Barra de navegação mobile --> 
-
   <nav class="fixed-bottom bg-white d-md-none border-top py-2 bottom-nav">
     <div class="container-fluid d-flex justify-content-around text-center">
-      <a href="#" class="nav-link-custom text-danger">
+      <a href="index.html" class="nav-link-custom text-danger">
           <i class="bi bi-house-door-fill fs-4"></i>
           <span class="small d-block">Início</span>
       </a>
@@ -236,12 +234,12 @@
   </nav>
 
 <!-- Mapa -->   
-
   <div id="map"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="config.js"></script>
   <script src="utils.js"></script>
   <script src="script.js"></script>
+  <script src="app.js"></script>
 </body>
-</html>>
+</html>

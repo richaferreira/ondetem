@@ -192,6 +192,20 @@ const estabelecimentos = [
 
 ---
 
+## 9. Integração de Notificações Push (Aula 6)
+
+Conforme o conteúdo da Aula 6, implementamos um sistema de notificações push para o PWA:
+
+### Funcionalidades Implementadas:
+- **Botão de Inscrição**: Adicionado no header para o usuário permitir notificações.
+- **Service Worker (sw.js)**: Atualizado com listeners para eventos `push` e `notificationclick`.
+- **Lógica app.js**: Gerenciamento de permissões, registro de subscription e conversão de chaves VAPID.
+- **Feedback de Agendamento**: Ao finalizar um agendamento, o usuário recebe uma notificação de confirmação.
+
+**Benefício**: Aumenta o engajamento do usuário e aproxima a aplicação web de uma experiência nativa.
+
+---
+
 ## Arquivos Modificados
 
 | Arquivo | Mudanças |
