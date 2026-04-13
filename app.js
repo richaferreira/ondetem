@@ -1,0 +1,116 @@
+/**
+ * app.js - Gerenciamento de Notificações Push
+ * Implementação baseada na Aula 6 - Engenharia de Software
+ */
+
+// Chave VAPID pública (Gerada para o projeto)
+const VAPID_PUBLIC_KEY = 'BNo6E7y9E_v1G9QyXq8zY4Z5R8J2L6m5n4b3v2c1x0z9a8s7d6f5g4h3j2k1l0'; // Chave de exemplo
+
+// 1. Registra o Service Worker ao carregar a página
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => {
+                console.log('✓ SW registrado para Push:', reg.scope);
+                configurarBotao(reg);
+            })
+            .catch(err => console.error('✗ Erro ao registrar SW para Push:', err));
+    });
+}
+
+// 2. Configura o botão de inscrição
+function configurarBotao(registration) {
+    const btnDesktop = document.getElementById('btn-subscribe');
+    const btnMobile = document.getElementById('btn-subscribe-mobile');
+
+    const handleSubscribe = async (btn) => {
+        const permissao = await Notification.requestPermission();
+        if (permissao === 'granted') {
+            await inscreverUsuario(registration);
+            atualizarBotaoStatus(btn, true);
+            mostrarNotificacaoLocal('Notificações Ativadas!', 'Agora você receberá alertas de agendamento.');
+        } else {
+            btn.textContent = 'Permissão Negada';
+            console.warn('⚠ Permissão de notificação negada pelo usuário.');
+        }
+    };
+
+    if (btnDesktop) {
+        btnDesktop.addEventListener('click', () => handleSubscribe(btnDesktop));
+    }
+    if (btnMobile) {
+        btnMobile.addEventListener('click', () => handleSubscribe(btnMobile));
+    }
+
+    // Verificar se já está inscrito
+    registration.pushManager.getSubscription().then(subscription => {
+        if (subscription) {
+            if (btnDesktop) atualizarBotaoStatus(btnDesktop, true);
+            if (btnMobile) atualizarBotaoStatus(btnMobile, true);
+        }
+    });
+}
+
+function atualizarBotaoStatus(btn, inscrito) {
+    if (inscrito) {
+        btn.disabled = true;
+        if (btn.id === 'btn-subscribe-mobile') {
+            btn.innerHTML = '<i class="bi bi-bell-fill text-success"></i>';
+        } else {
+            btn.innerHTML = '🔔 Notificações Ativas';
+            btn.classList.replace('btn-outline-primary', 'btn-success');
+        }
+    }
+}
+
+// 3. Cria a subscription com a chave VAPID pública
+async function inscreverUsuario(registration) {
+    try {
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+        
+        console.log('✓ Usuário inscrito no Push:', JSON.stringify(subscription));
+        
+        // Enviar 'subscription' para o back-end aqui (simulado)
+        // await enviarSubscriptionParaServidor(subscription);
+        
+    } catch (err) {
+        console.error('✗ Falha ao inscrever usuário no Push:', err);
+    }
+}
+
+// Utilitário: converte chave VAPID de Base64 para Uint8Array
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+').replace(/_/g, '/');
+    const raw = window.atob(base64);
+    const outputArray = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; ++i) {
+        outputArray[i] = raw.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+// Função para disparar notificação local (simulação de push)
+function mostrarNotificacaoLocal(titulo, corpo) {
+    if (Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification(titulo, {
+                body: corpo,
+                icon: '/img/Logo-png 5.svg',
+                badge: '/img/Logo-png 5.svg',
+                vibrate: [100, 50, 100],
+                data: {
+                    dateOfArrival: Date.now(),
+                    primaryKey: 1
+                }
+            });
+        });
+    }
+}
+
+// Exportar para uso no script.js
+window.mostrarNotificacaoPush = mostrarNotificacaoLocal;

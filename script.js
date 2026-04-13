@@ -320,6 +320,14 @@ async function processarAgendamento(form, statusPagamento) {
                     `Agendamento confirmado em ${dadosAgendamento.estabelecimento}`,
                     'success'
                 );
+
+                // DISPARAR NOTIFICAÇÃO PUSH (Simulada conforme Aula 6)
+                if (window.mostrarNotificacaoPush) {
+                    window.mostrarNotificacaoPush(
+                        'Agendamento Confirmado! ✅',
+                        `Sua reserva em ${dadosAgendamento.estabelecimento} para o dia ${formatarData(dadosAgendamento.data)} às ${dadosAgendamento.hora} foi realizada com sucesso.`
+                    );
+                }
                 
                 console.log('✓ Agendamento realizado:', dadosAgendamento);
             }, 2000);

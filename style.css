@@ -71,6 +71,31 @@ a:hover {
    4. BOTÕES
    ============================================ */
 
+#btn-subscribe {
+  background-color: var(--cor-primaria);
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#btn-subscribe:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+#btn-subscribe:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn {
     border-radius: 25px;
     padding: 10px 24px;
