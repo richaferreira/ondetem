@@ -1,269 +1,119 @@
-# Melhorias Implementadas no Projeto "Onde Tem?"
-
-## Resumo Executivo
-
-O projeto "Onde Tem?" é uma Progressive Web App (PWA) para agendamento de serviços estéticos. Durante a otimização, foram implementadas melhorias significativas mantendo toda a funcionalidade existente, focando em performance, interatividade e experiência do usuário.
-
----
-
-## 1. Refatoração do Código JavaScript
-
-### Antes
-- Script do Leaflet (mapa) estava embutido no HTML, dificultando manutenção
-- Sem separação clara de responsabilidades
-
-### Depois
-- **Função `inicializarMapa()`**: Movida para `script.js`, permitindo melhor organização
-- **Dados Centralizados**: Array `estabelecimentos` contém informações reutilizáveis
-- **Código Limpo**: Melhor legibilidade e manutenibilidade
-
-**Benefício**: Facilita futuras expansões e correções de bugs.
-
----
-
-## 2. Filtro por Categorias (Nova Funcionalidade)
-
-### Implementação
-- Clique nas categorias (Cabelo, Unhas, Depilação, etc.) para filtrar os estabelecimentos
-- Clique novamente para remover o filtro
-- Visual feedback com estilo `.active` na categoria selecionada
-
-### Código Relevante
-```javascript
-categoryItems.forEach(item => {
-    item.addEventListener('click', () => {
-        const categoria = item.querySelector('p').innerText;
-        
-        if(filtroAtivo === categoria) {
-            filtroAtivo = null;
-            item.classList.remove('active');
-            cards.forEach(card => card.style.display = "block");
-        } else {
-            filtroAtivo = categoria;
-            categoryItems.forEach(c => c.classList.remove('active'));
-            item.classList.add('active');
-            filtrarPorCategoria(categoria);
-        }
-    });
-});
-```
-
-**Benefício**: Melhora a descoberta de serviços e reduz o tempo de busca do usuário.
-
----
-
-## 3. Persistência de Agendamentos com localStorage
-
-### Implementação
-- Agendamentos realizados são salvos automaticamente no `localStorage`
-- Dados incluem: ID único, local, data, hora, método de pagamento e timestamp
-- Página dedicada (`agendamentos.html`) para visualizar histórico
-
-### Dados Salvos
-```javascript
-const dadosAgendamento = {
-    id: Date.now(),
-    local: "Nome do Estabelecimento",
-    data: "2026-04-15",
-    hora: "14:00",
-    pagamento: "pix",
-    timestamp: new Date().toLocaleString('pt-BR')
-};
-```
-
-**Benefício**: Usuários podem consultar seus agendamentos mesmo sem conexão com a internet.
-
----
-
-## 4. Nova Página: Agendamentos (`agendamentos.html`)
-
-### Funcionalidades
-- Listagem de todos os agendamentos salvos
-- Visualização de data, hora e método de pagamento
-- Opção de remover agendamentos individuais
-- Botão para limpar todos os agendamentos
-- Mensagem amigável quando não há agendamentos
-
-### Design
-- Integrado com o design existente
-- Responsivo para mobile e desktop
-- Ícones visuais para melhor compreensão
-- Animações suaves ao passar o mouse
-
-**Benefício**: Oferece aos usuários uma forma intuitiva de gerenciar seus agendamentos.
-
----
-
-## 5. Marcadores de Estabelecimentos no Mapa
-
-### Antes
-- Apenas marcador da localização do usuário
-
-### Depois
-- Marcadores para cada estabelecimento (Studio Bella Donna, Clínica Estética Flores, Espaço Glow)
-- Pop-ups com nome e categorias do estabelecimento
-- Funciona mesmo sem localização GPS
-
-**Benefício**: Usuários visualizam todos os estabelecimentos disponíveis no mapa.
-
----
-
-## 6. Otimização do Service Worker
-
-### Melhorias
-- **Versionamento de Cache**: `v1` → `v2` para garantir atualização
-- **Dois Caches Separados**:
-  - `CACHE_NAME`: Arquivos essenciais (HTML, CSS, JS)
-  - `RUNTIME_CACHE`: Recursos externos (Bootstrap, Leaflet)
-- **Limpeza de Caches Antigos**: Remove versões antigas automaticamente
-- **Estratégias Diferentes**:
-  - Cache-first para recursos locais
-  - Network-first para recursos externos
-- **Tratamento de Erros**: Fallback offline melhorado
-
-### Benefício
-- Melhor performance offline
-- Menor consumo de dados
-- Atualizações mais eficientes
-
----
-
-## 7. Melhorias de CSS e Animações
-
-### Novos Estilos
-```css
-/* Categoria ativa com destaque visual */
-.category-item.active .icon-circle {
-    background-color: #553A73;
-    color: white;
-    box-shadow: 0 4px 12px rgba(85, 58, 115, 0.3);
-}
-
-/* Transições suaves em elementos interativos */
-.category-item .icon-circle,
-.service-card,
-.btn-danger {
-    transition: all 0.3s ease;
-}
-
-/* Animação de entrada dos cards */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Responsividade melhorada para o mapa */
-@media (max-width: 768px) {
-    #map { height: 300px; }
-}
-
-@media (max-width: 480px) {
-    #map { height: 250px; }
-}
-```
-
-**Benefício**: Interface mais polida e responsiva, melhor experiência em todos os dispositivos.
-
----
-
-## 8. Estrutura de Dados Centralizada
-
-### Array `estabelecimentos`
-```javascript
-const estabelecimentos = [
-    {
-        id: 0,
-        nome: "Studio Bella Donna",
-        lat: -22.9345,
-        lng: -42.4951,
-        categorias: ["Cabelo", "Unhas", "Sobrancelhas"]
-    },
-    // ... mais estabelecimentos
-];
-```
-
-**Benefício**: Facilita a manutenção, expansão e sincronização de dados entre diferentes partes da aplicação.
-
----
-
-## 9. Integração de Notificações Push (Aula 6)
-
-Conforme o conteúdo da Aula 6, implementamos um sistema de notificações push para o PWA:
-
-### Funcionalidades Implementadas:
-- **Botão de Inscrição**: Adicionado no header para o usuário permitir notificações.
-- **Service Worker (sw.js)**: Atualizado com listeners para eventos `push` e `notificationclick`.
-- **Lógica app.js**: Gerenciamento de permissões, registro de subscription e conversão de chaves VAPID.
-- **Feedback de Agendamento**: Ao finalizar um agendamento, o usuário recebe uma notificação de confirmação.
-
-**Benefício**: Aumenta o engajamento do usuário e aproxima a aplicação web de uma experiência nativa.
-
----
-
-## Arquivos Modificados
-
-| Arquivo | Mudanças |
-|---------|----------|
-| `script.js` | Refatoração completa, adição de filtros, localStorage, mapa otimizado |
-| `style.css` | Novos estilos, animações, responsividade melhorada |
-| `service-worker.js` | Estratégia de cache otimizada, limpeza de versões antigas |
-| `index.html` | Remoção de script inline do mapa, link para agendamentos |
-| `agendamentos.html` | **NOVO** - Página de visualização de agendamentos |
-| `ANALISE.md` | **NOVO** - Análise técnica do projeto |
-| `README_MELHORIAS.md` | **NOVO** - Este arquivo |
-
----
-
-## Como Testar as Melhorias
-
-### 1. Filtro por Categorias
-1. Abra a página inicial
-2. Clique em qualquer ícone de categoria (ex: "Cabelo")
-3. Observe que apenas os estabelecimentos dessa categoria aparecem
-4. Clique novamente para remover o filtro
-
-### 2. Agendamentos
-1. Clique em "Agendar" em qualquer estabelecimento
-2. Preencha o formulário e confirme
-3. Acesse a aba "Agendamentos" no menu mobile ou clique em `agendamentos.html`
-4. Veja seu agendamento listado
-
-### 3. Mapa com Marcadores
-1. Abra a página inicial
-2. Role até o mapa
-3. Observe os marcadores dos estabelecimentos
-4. Clique nos marcadores para ver informações
-
-### 4. Offline
-1. Abra as ferramentas de desenvolvedor (F12)
-2. Vá para a aba "Application" → "Service Workers"
-3. Marque "Offline"
-4. Recarregue a página
-5. A aplicação continua funcionando com dados em cache
-
----
-
-## Recomendações Futuras
-
-1. **Backend Real**: Integrar com um servidor para persistência de dados
-2. **Autenticação**: Implementar login/registro de usuários
-3. **Avaliações**: Adicionar sistema de avaliações e comentários
-4. **Notificações**: Implementar Web Push Notifications para lembretes
-5. **Pagamento Real**: Integrar com gateways de pagamento (Stripe, PagSeguro)
-6. **Busca Avançada**: Filtros por preço, distância, disponibilidade
-7. **Perfil do Profissional**: Página dedicada para cada estabelecimento
-8. **Agendamento em Tempo Real**: Verificação de disponibilidade em tempo real
-
----
-
-## Conclusão
-
-O projeto "Onde Tem?" agora oferece uma experiência mais robusta, interativa e user-friendly. As melhorias mantêm a simplicidade do código original enquanto adicionam funcionalidades significativas que melhoram a usabilidade e a performance da aplicação.
-
-Todas as mudanças foram implementadas com foco em **manutenibilidade**, **escalabilidade** e **experiência do usuário**.
+Aqui está a tradução do seu plano de testes. Mantive a formatação original em Markdown e adaptei alguns termos para o jargão técnico comum em português brasileiro:
+
+# Plano de Testes: Páginas de Cadastro + Admin
+
+## O Que Mudou
+Três novas páginas adicionadas ao PWA "Onde Tem?":
+1. **Cadastro de usuário** (`/cadastro-usuario`) — formulário completo com dados pessoais, contato, endereço e senha
+2. **Cadastro de empresa** (`/cadastro-empresa`) — formulário comercial com CNPJ, categorias, serviços e horários
+3. **Dashboard Admin** (`/admin`) — login + painel de gerenciamento com estatísticas e tabelas de usuários/empresas/agendamentos
+
+Navegação atualizada: `login.html` agora possui os botões "Cadastrar como Usuário" e "Cadastrar como Empresa". `index.html` possui um link "Admin" no cabeçalho.
+
+## Fluxo Principal: Cadastro de Ponta a Ponta + Verificação do Admin
+
+### Teste 1: Navegação do Login para as Páginas de Cadastro
+**Passos:**
+1. Navegue para `http://localhost:3000/login`
+2. Verifique se a página exibe dois novos botões: "Cadastrar como Usuário" e "Cadastrar como Empresa"
+3. Clique em "Cadastrar como Usuário"
+
+**Critérios de aprovação:** O navegador redireciona para `/cadastro-usuario.html` e exibe o formulário com o título "Cadastro de Usuário"
+
+### Teste 2: Formulário de Cadastro de Usuário — Envio com Dados Válidos
+**Passos:**
+1. Em `/cadastro-usuario`, preencha:
+   - Nome Completo: "Maria Silva"
+   - CPF: "123.456.789-00"
+   - Data de Nascimento: "1990-05-15"
+   - E-mail: "maria@teste.com"
+   - Telefone: "(21) 99999-1234"
+   - Senha: "Teste@123"
+   - Confirmar Senha: "Teste@123"
+   - Marque o checkbox "termos de uso"
+2. Clique no botão "Criar Minha Conta"
+
+**Critérios de aprovação:**
+- Um banner de alerta verde aparece no topo com um texto contendo "Cadastro realizado com sucesso!"
+- O botão exibe temporariamente um *spinner* com o texto "Cadastrando..." durante o envio
+- Após cerca de 2 segundos, a página redireciona para `login.html`
+
+### Teste 3: Formulário de Cadastro de Usuário — Indicador de Força da Senha
+**Passos:**
+1. Em `/cadastro-usuario`, digite "abc" no campo Senha
+2. Observe o indicador de força da senha
+3. Em seguida, digite "Abc123!@" no campo Senha
+4. Observe o indicador de força da senha novamente
+
+**Critérios de aprovação:**
+- "abc" → a barra de força exibe o estado "fraca" com a cor vermelha/laranja
+- "Abc123!@" → a barra de força exibe o estado "forte" com a cor verde, e o texto de dica diz "Senha forte!"
+
+### Teste 4: Página de Cadastro de Empresa Carrega com Todas as Seções
+**Passos:**
+1. Navegue para `http://localhost:3000/cadastro-empresa`
+2. Role a página pelo formulário
+
+**Critérios de aprovação:** A página exibe todas as seções:
+- Seção "Dados da Empresa" com os campos `nomeEmpresa`, `cnpj`, `razaoSocial`, `nomeFantasia` e `descricaoEmpresa`
+- Seção "Categorias de Serviços" com 6 checkboxes (Cabelo, Unhas, Depilação, Sobrancelhas, Massagem, Rosto)
+- Seção "Serviços Oferecidos" com o botão "Adicionar Serviço"
+- Seção "Contato" com os campos `email`, `telefone`, `whatsapp` e `instagram`
+- Seção "Endereço do Estabelecimento" com o campo `CEP`
+- Seção "Horário de Funcionamento" com os checkboxes de dias e campos de horário
+- Seção "Senha de Acesso" com os campos `nomeResponsavel`, `senha` e `confirmarSenha`
+- O botão de envio "Cadastrar Empresa" está visível
+
+### Teste 5: Login de Admin — Credenciais Corretas
+**Passos:**
+1. Navegue para `http://localhost:3000/admin`
+2. Verifique se o formulário de login está visível com o título "Painel Admin"
+3. Insira o email: "admin@ondetem.com"
+4. Insira a senha: "123456"
+5. Clique no botão "Entrar"
+
+**Critérios de aprovação:**
+- O formulário de login desaparece
+- O painel do dashboard admin aparece com uma barra lateral mostrando: Dashboard, Usuários, Empresas, Agendamentos, Configurações
+- O Dashboard exibe 4 cards de estatísticas: "Usuários Cadastrados", "Empresas Ativas", "Agendamentos" e "Receita Estimada"
+- A barra superior exibe o título "Dashboard" e o e-mail "admin@ondetem.com"
+
+### Teste 6: Login de Admin — Credenciais Incorretas
+**Passos:**
+1. Navegue para `http://localhost:3000/admin` (página recarregada/nova)
+2. Insira o email: "wrong@email.com"
+3. Insira a senha: "wrongpass"
+4. Clique em "Entrar"
+
+**Critérios de aprovação:**
+- O formulário de login permanece visível (sem troca de painel)
+- Um texto de erro em vermelho aparece dizendo "E-mail ou senha incorretos."
+
+### Teste 7: Painel Admin — Navegação da Barra Lateral
+**Passos:**
+1. Após o login bem-sucedido no admin, clique em "Usuários" na barra lateral
+2. Em seguida, clique em "Empresas" na barra lateral
+3. Depois, clique em "Configurações" na barra lateral
+
+**Critérios de aprovação:**
+- Clicar em "Usuários" → o título da barra superior muda para "Usuários" e exibe a tabela de usuários com "Nenhum usuário cadastrado"
+- Clicar em "Empresas" → o título da barra superior muda para "Empresas" e exibe a tabela de empresas com "Nenhuma empresa cadastrada"
+- Clicar em "Configurações" → o título da barra superior muda para "Configurações", exibe o campo de nome da plataforma com o valor "Onde Tem?" e o e-mail de suporte "suporte@ondetem.com"
+
+### Teste 8: Página Inicial (Index) — Link do Admin no Cabeçalho
+**Passos:**
+1. Navegue para `http://localhost:3000/`
+2. Verifique o cabeçalho em busca de um botão/link para "Admin"
+
+**Critérios de aprovação:** O cabeçalho exibe um link/botão "Admin" que aponta para `admin.html`
+
+## Evidências de Código
+- `server.js` linhas 35-45: Novas rotas para `/cadastro-usuario`, `/cadastro-empresa`, `/admin`
+- `server.js` linhas 101-130: Endpoints da API para `POST /api/usuarios` e `POST /api/empresas`
+- `server.js` linhas 52-63: `POST /api/login` com credenciais de admin fixadas no código (*hardcoded*)
+- `login.html` linhas 38-41: Novos botões de cadastro
+- `index.html` linha 33: Link do Admin no cabeçalho
+- `cadastro-usuario.html` linhas 606-677: Manipulador de envio (*submit handler*) do formulário
+- `cadastro-empresa.html` linhas 724-832: Manipulador de envio do formulário
+- `admin.html` linhas 770-810: Manipulador de login do admin
+- `admin.html` linhas 836-873: Manipulador de navegação da barra lateral
