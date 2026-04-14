@@ -328,6 +328,11 @@
     let agendamentoSelecionado = null;
     let filtroAtivo = null;
 
+    // HTML sanitization helper to prevent XSS
+    function esc(str) {
+      return String(str).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);
+    }
+
     // Carregar agendamentos ao abrir a página
     document.addEventListener('DOMContentLoaded', () => {
       carregarAgendamentos();
@@ -437,10 +442,10 @@
         const telefone = estabelecimento ? estabelecimento.telefone : 'N/A';
 
         html += `
-          <div class="card agendamento-card ${statusClass}" onclick="mostrarDetalhes(${agendamento.id})">
+          <div class="card agendamento-card ${statusClass}" onclick="mostrarDetalhes(${parseInt(agendamento.id, 10) || 0})">
             <div class="card-header-agendamento">
               <div class="d-flex justify-content-between align-items-center">
-                <h5>${agendamento.estabelecimento}</h5>
+                <h5>${esc(agendamento.estabelecimento)}</h5>
                 <span class="badge badge-status bg-${statusColor}">
                   <i class="bi bi-${statusIcon}"></i> ${statusLabel}
                 </span>
@@ -451,7 +456,7 @@
                 <i class="bi bi-calendar-event"></i>
                 <div class="info-agendamento-texto">
                   <label>Data</label>
-                  <span>${formatarData(agendamento.data)}</span>
+                  <span>${esc(formatarData(agendamento.data))}</span>
                 </div>
               </div>
 
@@ -459,7 +464,7 @@
                 <i class="bi bi-clock"></i>
                 <div class="info-agendamento-texto">
                   <label>Horário</label>
-                  <span>${agendamento.hora}</span>
+                  <span>${esc(agendamento.hora)}</span>
                 </div>
               </div>
 
@@ -467,7 +472,7 @@
                 <i class="bi bi-wallet2"></i>
                 <div class="info-agendamento-texto">
                   <label>Método de Pagamento</label>
-                  <span>${obterLabelPagamento(agendamento.pagamento)}</span>
+                  <span>${esc(obterLabelPagamento(agendamento.pagamento))}</span>
                 </div>
               </div>
 
@@ -475,15 +480,15 @@
                 <i class="bi bi-telephone"></i>
                 <div class="info-agendamento-texto">
                   <label>Contato</label>
-                  <span>${telefone}</span>
+                  <span>${esc(telefone)}</span>
                 </div>
               </div>
 
               <div class="d-flex justify-content-end gap-2 mt-3">
-                <button class="btn btn-sm btn-outline-primary btn-acao" onclick="copiarDetalhes(${agendamento.id})">
+                <button class="btn btn-sm btn-outline-primary btn-acao" onclick="copiarDetalhes(${parseInt(agendamento.id, 10) || 0})">
                   <i class="bi bi-clipboard"></i> Copiar
                 </button>
-                <button class="btn btn-sm btn-outline-danger btn-acao" onclick="removerAgendamentoConfirm(${agendamento.id})">
+                <button class="btn btn-sm btn-outline-danger btn-acao" onclick="removerAgendamentoConfirm(${parseInt(agendamento.id, 10) || 0})">
                   <i class="bi bi-trash"></i> Remover
                 </button>
               </div>
@@ -550,10 +555,10 @@
         const telefone = estabelecimento ? estabelecimento.telefone : 'N/A';
 
         html += `
-          <div class="card agendamento-card ${statusClass}" onclick="mostrarDetalhes(${agendamento.id})">
+          <div class="card agendamento-card ${statusClass}" onclick="mostrarDetalhes(${parseInt(agendamento.id, 10) || 0})">
             <div class="card-header-agendamento">
               <div class="d-flex justify-content-between align-items-center">
-                <h5>${agendamento.estabelecimento}</h5>
+                <h5>${esc(agendamento.estabelecimento)}</h5>
                 <span class="badge badge-status bg-${statusColor}">
                   <i class="bi bi-${statusIcon}"></i> ${statusLabel}
                 </span>
@@ -564,7 +569,7 @@
                 <i class="bi bi-calendar-event"></i>
                 <div class="info-agendamento-texto">
                   <label>Data</label>
-                  <span>${formatarData(agendamento.data)}</span>
+                  <span>${esc(formatarData(agendamento.data))}</span>
                 </div>
               </div>
 
@@ -572,7 +577,7 @@
                 <i class="bi bi-clock"></i>
                 <div class="info-agendamento-texto">
                   <label>Horário</label>
-                  <span>${agendamento.hora}</span>
+                  <span>${esc(agendamento.hora)}</span>
                 </div>
               </div>
 
@@ -580,7 +585,7 @@
                 <i class="bi bi-wallet2"></i>
                 <div class="info-agendamento-texto">
                   <label>Método de Pagamento</label>
-                  <span>${obterLabelPagamento(agendamento.pagamento)}</span>
+                  <span>${esc(obterLabelPagamento(agendamento.pagamento))}</span>
                 </div>
               </div>
 
@@ -588,15 +593,15 @@
                 <i class="bi bi-telephone"></i>
                 <div class="info-agendamento-texto">
                   <label>Contato</label>
-                  <span>${telefone}</span>
+                  <span>${esc(telefone)}</span>
                 </div>
               </div>
 
               <div class="d-flex justify-content-end gap-2 mt-3">
-                <button class="btn btn-sm btn-outline-primary btn-acao" onclick="copiarDetalhes(${agendamento.id})">
+                <button class="btn btn-sm btn-outline-primary btn-acao" onclick="copiarDetalhes(${parseInt(agendamento.id, 10) || 0})">
                   <i class="bi bi-clipboard"></i> Copiar
                 </button>
-                <button class="btn btn-sm btn-outline-danger btn-acao" onclick="removerAgendamentoConfirm(${agendamento.id})">
+                <button class="btn btn-sm btn-outline-danger btn-acao" onclick="removerAgendamentoConfirm(${parseInt(agendamento.id, 10) || 0})">
                   <i class="bi bi-trash"></i> Remover
                 </button>
               </div>
@@ -615,14 +620,14 @@
       const estabelecimento = ESTABELECIMENTOS.find(e => e.id === agendamentoSelecionado.estabelecimentoId);
       
       const html = `
-        <p><strong>Estabelecimento:</strong> ${agendamentoSelecionado.estabelecimento}</p>
-        <p><strong>Data:</strong> ${formatarData(agendamentoSelecionado.data)}</p>
-        <p><strong>Horário:</strong> ${agendamentoSelecionado.hora}</p>
-        <p><strong>Método de Pagamento:</strong> ${obterLabelPagamento(agendamentoSelecionado.pagamento)}</p>
-        <p><strong>Status:</strong> ${agendamentoSelecionado.status || 'Confirmado'}</p>
-        <p><strong>Agendado em:</strong> ${agendamentoSelecionado.timestamp}</p>
-        ${estabelecimento ? `<p><strong>Contato:</strong> ${estabelecimento.telefone}</p>` : ''}
-        ${estabelecimento ? `<p><strong>Endereço:</strong> ${estabelecimento.endereco}</p>` : ''}
+        <p><strong>Estabelecimento:</strong> ${esc(agendamentoSelecionado.estabelecimento)}</p>
+        <p><strong>Data:</strong> ${esc(formatarData(agendamentoSelecionado.data))}</p>
+        <p><strong>Horário:</strong> ${esc(agendamentoSelecionado.hora)}</p>
+        <p><strong>Método de Pagamento:</strong> ${esc(obterLabelPagamento(agendamentoSelecionado.pagamento))}</p>
+        <p><strong>Status:</strong> ${esc(agendamentoSelecionado.status || 'Confirmado')}</p>
+        <p><strong>Agendado em:</strong> ${esc(agendamentoSelecionado.timestamp)}</p>
+        ${estabelecimento ? `<p><strong>Contato:</strong> ${esc(estabelecimento.telefone)}</p>` : ''}
+        ${estabelecimento ? `<p><strong>Endereço:</strong> ${esc(estabelecimento.endereco)}</p>` : ''}
       `;
 
       document.getElementById('modalBody').innerHTML = html;

@@ -114,7 +114,8 @@ function mostrarMensagemResultados(resultados, termo) {
     }
 
     if (resultados === 0 && termo) {
-        mensagem.innerHTML = `<i class="bi bi-search"></i> Nenhum resultado encontrado para "${termo}"`;
+        const termoSeguro = termo.replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);
+        mensagem.innerHTML = `<i class="bi bi-search"></i> Nenhum resultado encontrado para "${termoSeguro}"`;
         mensagem.style.display = 'block';
     } else {
         mensagem.style.display = 'none';
@@ -442,9 +443,15 @@ function adicionarMarcadoresEstabelecimentos() {
 // ============================================
 // 9. NOTIFICAÇÕES
 // ============================================
+function escaparHTML(str) {
+    return String(str).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);
+}
+
 function mostrarNotificacao(mensagem, tipo = 'info') {
+    const tiposPermitidos = ['info', 'success', 'warning', 'danger'];
+    const tipoSeguro = tiposPermitidos.includes(tipo) ? tipo : 'info';
     const notificacao = document.createElement('div');
-    notificacao.className = `alert alert-${tipo} alert-dismissible fade show`;
+    notificacao.className = `alert alert-${tipoSeguro} alert-dismissible fade show`;
     notificacao.role = 'alert';
     notificacao.style.position = 'fixed';
     notificacao.style.top = '20px';
@@ -452,7 +459,7 @@ function mostrarNotificacao(mensagem, tipo = 'info') {
     notificacao.style.zIndex = '9999';
     notificacao.style.minWidth = '300px';
     notificacao.innerHTML = `
-        ${mensagem}
+        ${escaparHTML(mensagem)}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
 
