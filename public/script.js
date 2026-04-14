@@ -114,7 +114,8 @@ function mostrarMensagemResultados(resultados, termo) {
     }
 
     if (resultados === 0 && termo) {
-        mensagem.innerHTML = `<i class="bi bi-search"></i> Nenhum resultado encontrado para "${termo}"`;
+        const termoSeguro = termo.replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]);
+        mensagem.innerHTML = `<i class="bi bi-search"></i> Nenhum resultado encontrado para "${termoSeguro}"`;
         mensagem.style.display = 'block';
     } else {
         mensagem.style.display = 'none';
