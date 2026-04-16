@@ -1,16 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - Onde Tem?</title>
     <link rel="stylesheet" href="stylesheet_login.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Fugaz+One&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
+
+    <style>
+        /* Tabs de seleção de tipo */
+        .tipo-tabs {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .tipo-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-family: "Poppins", sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tipo-tab:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .tipo-tab.active {
+            background: white;
+            color: #553a73;
+            border-color: white;
+            font-weight: 600;
+        }
+
+        /* Mensagem de erro */
+        .login-erro {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .login-erro.show {
+            display: block;
+        }
+
+        /* Link de cadastro */
+        .cadastro-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .cadastro-link p {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .cadastro-link .PF_PJ {
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* Esconder seções condicionalmente */
+        .cadastro-section {
+            display: none;
+        }
+
+        .cadastro-section.show {
+            display: block;
+        }
+
+        /* Voltar ao site */
+        .voltar-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .voltar-link a {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        .voltar-link a:hover {
+            color: white;
+        }
+
+        /* Ajustar container para caber tudo */
+        .container {
+            height: auto;
+            min-height: 30rem;
+            padding: 30px 20px;
+        }
+    </style>
 </head>
 
 <body>
@@ -19,30 +116,150 @@
             <div class="logo">
                 <img src="img/Logo-png 5.svg" alt="logo_onde_tem">
             </div>
+
             <div class="textos">
-                <p>
-                    Conecte-se com uma conta de
-                </p>
-                <div class="botao_PF">
-                    <button class="PF_PJ">Pessoa Jurídica
-                    </button>
-                </div>
+                <p>Entrar como:</p>
             </div>
+
+            <!-- Tabs de seleção de tipo de usuário -->
+            <div class="tipo-tabs">
+                <button class="tipo-tab active" data-tipo="usuario" onclick="selecionarTipo('usuario')">Usuário</button>
+                <button class="tipo-tab" data-tipo="empresa" onclick="selecionarTipo('empresa')">Empresa</button>
+                <button class="tipo-tab" data-tipo="admin" onclick="selecionarTipo('admin')">Admin</button>
+            </div>
+
+            <!-- Formulário de login -->
             <div class="acess">
-                <input type="Username" placeholder="Login" class="login">
-                <input type="Password" placeholder="Password">
-                <button class="button" type="button" onclick="window.location.href='index.html'">Login | Acessar</button>
+                <input type="email" id="loginEmail" placeholder="E-mail" class="login">
+                <input type="password" id="loginSenha" placeholder="Senha">
+                <button class="button" type="button" id="btnLogin" onclick="fazerLogin()">Login | Acessar</button>
             </div>
-            <div class="textos" style="margin-top: 15px;">
-                <p style="font-size: 0.9rem;">Não tem uma conta?</p>
-                <div class="botao_PF" style="gap: 10px; display: flex; flex-direction: column;">
-                    <button class="PF_PJ" type="button" onclick="window.location.href='cadastro-usuario.html'" style="cursor:pointer;">Cadastrar como Usuário</button>
-                    <button class="PF_PJ" type="button" onclick="window.location.href='cadastro-empresa.html'" style="cursor:pointer;">Cadastrar como Empresa</button>
+
+            <div class="login-erro" id="loginErro"></div>
+
+            <!-- Link de cadastro (muda conforme o tipo selecionado) -->
+            <div class="cadastro-section show" id="cadastroUsuario">
+                <div class="cadastro-link">
+                    <p>Não tem uma conta?</p>
+                    <div class="botao_PF">
+                        <button class="PF_PJ" type="button" onclick="window.location.href='cadastro-usuario.html'" style="cursor:pointer;">Cadastrar como Usuário</button>
+                    </div>
                 </div>
+            </div>
+
+            <div class="cadastro-section" id="cadastroEmpresa">
+                <div class="cadastro-link">
+                    <p>Não tem uma conta empresarial?</p>
+                    <div class="botao_PF">
+                        <button class="PF_PJ" type="button" onclick="window.location.href='cadastro-empresa.html'" style="cursor:pointer;">Cadastrar Empresa</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cadastro-section" id="cadastroAdmin">
+                <div class="cadastro-link">
+                    <p style="opacity: 0.6; font-size: 0.8rem;">Acesso restrito a administradores</p>
+                </div>
+            </div>
+
+            <div class="voltar-link">
+                <a href="index.html">← Voltar ao site</a>
             </div>
         </div>
+    </div>
 
+    <script>
+        let tipoSelecionado = 'usuario';
 
+        function selecionarTipo(tipo) {
+            tipoSelecionado = tipo;
+
+            // Atualizar tabs ativas
+            document.querySelectorAll('.tipo-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.tipo-tab[data-tipo="${tipo}"]`).classList.add('active');
+
+            // Mostrar/esconder seções de cadastro
+            document.querySelectorAll('.cadastro-section').forEach(s => s.classList.remove('show'));
+            if (tipo === 'usuario') {
+                document.getElementById('cadastroUsuario').classList.add('show');
+            } else if (tipo === 'empresa') {
+                document.getElementById('cadastroEmpresa').classList.add('show');
+            } else if (tipo === 'admin') {
+                document.getElementById('cadastroAdmin').classList.add('show');
+            }
+
+            // Limpar erro
+            esconderErro();
+        }
+
+        async function fazerLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const senha = document.getElementById('loginSenha').value;
+            const btn = document.getElementById('btnLogin');
+
+            if (!email || !senha) {
+                mostrarErro('Preencha o e-mail e a senha.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Entrando...';
+            esconderErro();
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha, tipo: tipoSelecionado })
+                });
+
+                const resultado = await response.json();
+
+                if (response.ok) {
+                    // Salvar sessão
+                    sessionStorage.setItem('ondetem_usuario_logado', email);
+                    sessionStorage.setItem('ondetem_usuario_tipo', tipoSelecionado);
+
+                    // Redirecionar conforme o tipo
+                    if (tipoSelecionado === 'admin') {
+                        sessionStorage.setItem('ondetem_admin_logado', email);
+                        window.location.href = 'admin.html';
+                    } else if (tipoSelecionado === 'empresa') {
+                        window.location.href = 'index.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    mostrarErro(resultado.erro || 'E-mail ou senha incorretos.');
+                }
+            } catch (erro) {
+                console.error('Erro no login:', erro);
+                mostrarErro('Erro de conexão. Tente novamente.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Login | Acessar';
+            }
+        }
+
+        function mostrarErro(mensagem) {
+            const erroEl = document.getElementById('loginErro');
+            erroEl.textContent = mensagem;
+            erroEl.classList.add('show');
+        }
+
+        function esconderErro() {
+            document.getElementById('loginErro').classList.remove('show');
+        }
+
+        // Permitir login com Enter
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                fazerLogin();
+            }
+        });
+    </script>
 </body>
 
 </html>
