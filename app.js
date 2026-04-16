@@ -103,6 +103,7 @@ async function inscreverUsuario(registration) {
         
     } catch (err) {
         console.error('✗ Falha ao inscrever usuário no Push:', err);
+        throw err;
     }
 }
 
