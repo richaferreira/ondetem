@@ -50,17 +50,44 @@ app.get('/admin', (req, res) => {
 
 // --- ROTAS DE LOGIN ---
 app.post('/api/login', (req, res) => {
-    const { email, senha } = req.body;
+    const { email, senha, tipo } = req.body;
 
-    // Lógica de verificação (posteriormente será conectada ao banco de dados)
+    if (!email || !senha) {
+        return res.status(400).json({ erro: "Preencha o e-mail e a senha." });
+    }
+
+    // Login de admin - credenciais fixas
+    if (tipo === 'admin') {
+        if (email === 'admin@ondetem.com' && senha === '123456') {
+            return res.status(200).json({
+                mensagem: "Autenticação aprovada",
+                tipo: 'admin',
+                token: "token_de_acesso_gerado_aqui"
+            });
+        } else {
+            return res.status(401).json({ erro: "Credenciais de administrador inválidas." });
+        }
+    }
+
+    // Login de usuário ou empresa - aceita qualquer credencial por enquanto
+    // (posteriormente será conectado ao banco de dados)
+    if (tipo === 'usuario' || tipo === 'empresa') {
+        return res.status(200).json({
+            mensagem: "Autenticação aprovada",
+            tipo: tipo,
+            token: "token_de_acesso_gerado_aqui"
+        });
+    }
+
+    // Fallback - login legado sem tipo
     if (email === 'admin@ondetem.com' && senha === '123456') {
-        res.status(200).json({
+        return res.status(200).json({
             mensagem: "Autenticação aprovada",
             token: "token_de_acesso_gerado_aqui"
         });
-    } else {
-        res.status(401).json({ erro: "E-mail ou senha incorretos." });
     }
+
+    res.status(401).json({ erro: "E-mail ou senha incorretos." });
 });
 
 // --- ROTAS DE AGENDAMENTOS ---

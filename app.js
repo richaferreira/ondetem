@@ -7,15 +7,21 @@
 const VAPID_PUBLIC_KEY = 'BNo6E7y9E_v1G9QyXq8zY4Z5R8J2L6m5n4b3v2c1x0z9a8s7d6f5g4h3j2k1l0'; // Chave de exemplo
 
 // 1. Registra o Service Worker ao carregar a página
-if ('serviceWorker' in navigator && 'PushManager' in window) {
+if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        // AQUI ESTAVA O ERRO: Adicionado o PONTO antes da barra
         navigator.serviceWorker.register('./service-worker.js')
             .then(reg => {
                 console.log('✓ SW registrado para Push:', reg.scope);
                 configurarBotao(reg);
             })
-            .catch(err => console.error('✗ Erro ao registrar SW para Push:', err));
+            .catch(err => {
+                console.warn('⚠ SW não registrado, configurando botão sem push:', err);
+                configurarBotao(null);
+            });
+    });
+} else {
+    window.addEventListener('load', () => {
+        configurarBotao(null);
     });
 }
 
@@ -24,10 +30,25 @@ function configurarBotao(registration) {
     const btnDesktop = document.getElementById('btn-subscribe');
     const btnMobile = document.getElementById('btn-subscribe-mobile');
 
+    // Verificar estado salvo
+    const notificacoesAtivas = localStorage.getItem('ondetem_notificacoes_ativas') === 'true';
+    if (notificacoesAtivas) {
+        if (btnDesktop) atualizarBotaoStatus(btnDesktop, true);
+        if (btnMobile) atualizarBotaoStatus(btnMobile, true);
+    }
+
     const handleSubscribe = async (btn) => {
         const permissao = await Notification.requestPermission();
         if (permissao === 'granted') {
-            await inscreverUsuario(registration);
+            // Tentar inscrição push se disponível
+            if (registration && 'pushManager' in registration) {
+                try {
+                    await inscreverUsuario(registration);
+                } catch (err) {
+                    console.warn('⚠ Push subscription falhou, usando notificações locais:', err);
+                }
+            }
+            localStorage.setItem('ondetem_notificacoes_ativas', 'true');
             atualizarBotaoStatus(btn, true);
             mostrarNotificacaoLocal('Notificações Ativadas!', 'Agora você receberá alertas de agendamento.');
         } else {
@@ -43,13 +64,15 @@ function configurarBotao(registration) {
         btnMobile.addEventListener('click', () => handleSubscribe(btnMobile));
     }
 
-    // Verificar se já está inscrito e atualizar os botões de acordo
-    registration.pushManager.getSubscription().then(subscription => {
-        if (subscription) {
-            if (btnDesktop) atualizarBotaoStatus(btnDesktop, true);
-            if (btnMobile) atualizarBotaoStatus(btnMobile, true);
-        }
-    });
+    // Verificar se já está inscrito via push e atualizar os botões
+    if (registration && 'pushManager' in registration) {
+        registration.pushManager.getSubscription().then(subscription => {
+            if (subscription) {
+                if (btnDesktop) atualizarBotaoStatus(btnDesktop, true);
+                if (btnMobile) atualizarBotaoStatus(btnMobile, true);
+            }
+        }).catch(() => {});
+    }
 }
 
 // Função auxiliar para atualizar o visual do botão
@@ -80,6 +103,7 @@ async function inscreverUsuario(registration) {
         
     } catch (err) {
         console.error('✗ Falha ao inscrever usuário no Push:', err);
+        throw err;
     }
 }
 
