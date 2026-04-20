@@ -123,7 +123,7 @@ router.get('/:id', (req, res) => {
         return res.status(400).json({ erro: "ID inválido." });
     }
 
-    const empresa = empresas.find(e => e.id === id);
+    const empresa = empresas.find(e => e.id === id && e.ativo && e.aprovado);
     if (!empresa) {
         return res.status(404).json({ erro: "Empresa não encontrada." });
     }
