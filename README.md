@@ -141,7 +141,7 @@ No modal de agendamento da home, ao escolher **Cartão de Crédito** aparece um 
 
 Última execução: **20/04/2026**, em `http://localhost:3000` (servidor Express local), Chrome maximizado, gravação única com anotações por teste. O plano completo está em [`test-plan.md`](./test-plan.md) e o relatório detalhado em [`test-report.md`](./test-report.md).
 
-🎥 **Vídeo da execução completa:** (./docs/video/completo.mp4)
+🎥 **Vídeo da execução completa:** [Assistir vídeo](./docs/video/completo.mp4)
 
 | # | Teste | Fix/feature | Resultado |
 |---|-------|-------------|-----------|
