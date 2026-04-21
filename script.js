@@ -116,7 +116,11 @@ function mostrarMensagemResultados(resultados, termo) {
     }
 
     if (resultados === 0 && termo) {
-        mensagem.innerHTML = `<i class="bi bi-search"></i> Nenhum resultado encontrado para "${termo}"`;
+        mensagem.textContent = '';
+        const icone = document.createElement('i');
+        icone.className = 'bi bi-search';
+        mensagem.appendChild(icone);
+        mensagem.appendChild(document.createTextNode(` Nenhum resultado encontrado para "${termo}"`));
         mensagem.style.display = 'block';
     } else {
         mensagem.style.display = 'none';

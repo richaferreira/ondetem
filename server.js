@@ -11,6 +11,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
+// Healthcheck simples (útil para monitoramento / deploy / CI).
+app.get('/healthz', (req, res) => {
+    res.json({
+        status: 'ok',
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+        counts: {
+            usuarios: db.usuarios.length,
+            empresas: db.empresas.length,
+            agendamentos: db.agendamentos.length,
+            pagamentos: db.pagamentos.length,
+            sessoesAtivas: db.sessoes.size
+        }
+    });
+});
+
 // ==========================================
 // "Banco de dados" em memória (substituir por DB real depois)
 // ==========================================
@@ -574,6 +590,11 @@ app.post('/api/empresas', (req, res) => {
     const { senha: _, ...publico } = novo;
     res.status(201).json({ mensagem: 'Empresa cadastrada com sucesso!', dados: publico });
 });
+
+// ==========================================
+// Chat IA (Google Gemini) — registra POST /api/chat
+// ==========================================
+require('./chat').registrarRotas(app);
 
 // ==========================================
 // INICIALIZAÇÃO

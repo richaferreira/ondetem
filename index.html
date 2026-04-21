@@ -4,489 +4,219 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Onde Tem? - Agendamento de Serviços de Beleza e Estética</title>
+  <meta name="description" content="Encontre e agende serviços de beleza — cabelo, unhas, estética, massagem — perto de você. Compare salões, veja avaliações e pague online com Pix ou cartão.">
+  <meta name="author" content="Onde Tem?">
+  <meta name="robots" content="index,follow">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!--
+    Open Graph / Twitter Card. og:image precisa ser URL ABSOLUTA + formato
+    raster (PNG/JPEG) para que os crawlers de FB/Twitter/LinkedIn consigam
+    renderizar o preview. Em produção, troque ./img/og-preview.png pela URL
+    absoluta do domínio (ex.: https://ondetem.example.com/img/og-preview.png)
+    e atualize og:url de acordo.
+  -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Onde Tem?">
+  <meta property="og:title" content="Onde Tem? — Agendamento de serviços de beleza perto de você">
+  <meta property="og:description" content="Descubra salões, clínicas e profissionais perto de você. Agende em cliques e pague online com Pix ou cartão.">
+  <meta property="og:image" content="./img/og-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Logo do Onde Tem? sobre fundo off-white">
+  <meta property="og:locale" content="pt_BR">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Onde Tem? — Agendamento de serviços de beleza">
+  <meta name="twitter:description" content="Descubra salões, clínicas e profissionais perto de você. Agende em cliques e pague online.">
+  <meta name="twitter:image" content="./img/og-preview.png">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#553A73">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="chat-widget.css">
 </head>
 
-<body>
+<body class="airbnb-home">
 
-  <!-- Top bar: contato / seja parceiro -->
-  <div class="topbar d-none d-md-block">
-    <div class="container d-flex justify-content-between align-items-center">
-      <span class="topbar-msg"><i class="bi bi-geo-alt-fill"></i> Encontre serviços de beleza perto de você</span>
-      <div class="topbar-links">
-        <a href="cadastro-empresa.html"><i class="bi bi-shop"></i> Seja um parceiro</a>
-        <span class="sep">•</span>
-        <a href="tel:+5500000000000"><i class="bi bi-telephone"></i> Suporte</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Header desktop -->
-  <header class="site-header sticky-top d-none d-md-block">
-    <div class="container d-flex justify-content-between align-items-center">
-      <a href="index.html" class="logo d-flex align-items-center text-decoration-none">
-        <span class="logo-badge">O</span>
-        <span class="logo-text">
-          <span class="logo-title">Onde tem<span class="logo-dot">?</span></span>
-          <span class="logo-sub">Beleza &amp; bem-estar</span>
-        </span>
+  <!-- ========== HEADER DESKTOP (estilo Airbnb) ========== -->
+  <header class="ot-header d-none d-md-block">
+    <div class="ot-header-inner">
+      <a class="ot-logo" href="/" aria-label="Onde Tem?">
+        <i class="bi bi-b-circle-fill"></i>
+        <span>Onde tem?</span>
       </a>
 
-      <nav class="main-nav d-none d-lg-flex">
-        <a href="#categorias">Serviços</a>
-        <a href="#destaques">Estabelecimentos</a>
-        <a href="#como-funciona">Como funciona</a>
-        <a href="#mapa-section">Perto de você</a>
-      </nav>
-
-      <div class="search-bar">
-        <i class="bi bi-search search-bar-icon"></i>
-        <input type="search" class="form-control" placeholder="Buscar serviço, salão ou profissional…">
-      </div>
-
-      <div class="header-action d-flex align-items-center gap-2">
-        <a href="cadastro-usuario.html" class="btn btn-ghost">Cadastrar</a>
-        <a href="login.html" class="btn btn-primary-onde">Entrar</a>
-      </div>
-    </div>
-  </header>
-
-  <!-- Header mobile -->
-  <header class="site-header site-header-mobile d-md-none sticky-top">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-      <a href="index.html" class="logo d-flex align-items-center text-decoration-none">
-        <span class="logo-badge">O</span>
-        <span class="logo-title-mobile">Onde tem?</span>
-      </a>
-      <div class="search-container-mobile d-flex align-items-center gap-2">
-        <input type="search" id="input-busca-mobile" class="form-control rounded-pill d-none" placeholder="Buscar…">
-        <div class="search-icon" id="btn-lupa-mobile" aria-label="Buscar">
+      <!-- Pill de busca estilo Airbnb — um único input ligado ao script de filtro -->
+      <div class="search-bar ot-search-pill" role="search">
+        <label class="ot-search-seg ot-search-seg-main">
+          <span class="ot-search-label">Buscar</span>
+          <input type="search" placeholder="Serviço, salão ou profissional perto de você">
+        </label>
+        <button class="ot-search-btn" type="button" aria-label="Buscar">
           <i class="bi bi-search"></i>
-        </div>
-        <a href="login.html" class="btn btn-primary-onde btn-sm ms-2">Entrar</a>
+        </button>
       </div>
+
+      <nav class="ot-actions">
+        <a href="cadastro-empresa.html" class="ot-action-link d-none d-lg-inline">Anuncie seu salão</a>
+        <a href="login.html" class="ot-user-btn" aria-label="Entrar ou cadastrar">
+          <i class="bi bi-list"></i>
+          <span class="ot-user-avatar"><i class="bi bi-person-fill"></i></span>
+        </a>
+      </nav>
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-bg" aria-hidden="true"></div>
-    <div class="container position-relative">
-      <div class="row align-items-center g-5">
-        <div class="col-lg-7 hero-copy">
-          <span class="eyebrow"><i class="bi bi-stars"></i> Beleza, bem-estar e autoestima</span>
-          <h1 class="hero-title">
-            Seu momento de beleza,<br>
-            <em>agendado em cliques.</em>
-          </h1>
-          <p class="hero-lead">
-            Descubra os melhores salões, clínicas e profissionais perto de você.
-            Compare serviços, escolha o horário e pague online — tudo em um só lugar.
-          </p>
-          <div class="hero-cta d-flex flex-wrap gap-2 gap-md-3">
-            <a href="#destaques" class="btn btn-primary-onde btn-lg">
-              <i class="bi bi-calendar2-heart"></i> Agendar agora
-            </a>
-            <a href="cadastro-empresa.html" class="btn btn-outline-onde btn-lg">
-              <i class="bi bi-shop-window"></i> Cadastrar meu negócio
-            </a>
-          </div>
-          <ul class="hero-checks">
-            <li><i class="bi bi-check-circle-fill"></i> Profissionais verificados</li>
-            <li><i class="bi bi-check-circle-fill"></i> Pagamento seguro (Pix e cartão)</li>
-            <li><i class="bi bi-check-circle-fill"></i> Lembretes automáticos</li>
-          </ul>
-        </div>
-        <div class="col-lg-5 d-none d-lg-block">
-          <div class="hero-gallery">
-            <div class="hero-gallery-main">
-              <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=900&q=80" alt="Profissional cuidando dos cabelos de cliente">
-            </div>
-            <div class="hero-gallery-card hero-gallery-card-1">
-              <i class="bi bi-calendar2-check"></i>
-              <div>
-                <strong>+10.000</strong>
-                <span>agendamentos realizados</span>
-              </div>
-            </div>
-            <div class="hero-gallery-card hero-gallery-card-2">
-              <i class="bi bi-star-fill"></i>
-              <div>
-                <strong>4.9 / 5</strong>
-                <span>avaliação média</span>
-              </div>
-            </div>
-          </div>
-        </div>
+  <!-- ========== HEADER MOBILE ========== -->
+  <header class="ot-header-mobile d-md-none">
+    <a class="ot-logo" href="/">
+      <i class="bi bi-b-circle-fill"></i>
+      <span>Onde tem?</span>
+    </a>
+    <div class="search-bar ot-search-mobile">
+      <i class="bi bi-search"></i>
+      <input type="search" id="input-busca-mobile" placeholder="Buscar serviço ou salão">
+      <span id="btn-lupa-mobile" class="d-none"></span>
+    </div>
+  </header>
+
+  <!-- ========== BARRA DE CATEGORIAS (estilo Airbnb) ========== -->
+  <section class="ot-categories-bar">
+    <div class="ot-categories-track">
+      <div class="category-item">
+        <div class="icon-circle"><i class="bi bi-scissors"></i></div>
+        <p>Cabelo</p>
+      </div>
+      <div class="category-item">
+        <div class="icon-circle"><i class="bi bi-hand-index-thumb"></i></div>
+        <p>Unhas</p>
+      </div>
+      <div class="category-item">
+        <div class="icon-circle"><i class="bi bi-gender-female"></i></div>
+        <p>Depilação</p>
+      </div>
+      <div class="category-item">
+        <div class="icon-circle"><i class="bi bi-eye"></i></div>
+        <p>Sobrancelhas</p>
+      </div>
+      <div class="category-item">
+        <div class="icon-circle"><i class="bi bi-person-hearts"></i></div>
+        <p>Massagem</p>
+      </div>
+      <div class="category-item">
+        <div class="icon-circle"><i class="bi bi-person-fill"></i></div>
+        <p>Rosto</p>
       </div>
     </div>
   </section>
 
-  <!-- STATS / TRUST BAR -->
-  <section class="stats">
-    <div class="container">
-      <div class="row g-4 text-center">
-        <div class="col-6 col-md-3">
-          <div class="stat">
-            <div class="stat-value">+500</div>
-            <div class="stat-label">Profissionais parceiros</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat">
-            <div class="stat-value">+10k</div>
-            <div class="stat-label">Agendamentos realizados</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat">
-            <div class="stat-value">4.9<span class="muted">/5</span></div>
-            <div class="stat-label">Avaliação média</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat">
-            <div class="stat-value">24/7</div>
-            <div class="stat-label">Agendamento online</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CATEGORIAS -->
-  <section id="categorias" class="categories">
-    <div class="container">
-      <div class="section-heading text-center">
-        <span class="section-eyebrow">Categorias</span>
-        <h2 class="section-title">O que você procura hoje?</h2>
-        <p class="section-sub">Escolha uma categoria e descubra os profissionais em destaque.</p>
-      </div>
-
-      <div class="categories-wrapper">
-        <div class="category-item text-center" data-category="Cabelo">
-          <div class="icon-circle shadow"><i class="bi bi-scissors"></i></div>
-          <p>Cabelo</p>
-        </div>
-        <div class="category-item text-center" data-category="Unhas">
-          <div class="icon-circle shadow"><i class="bi bi-hand-index-thumb"></i></div>
-          <p>Unhas</p>
-        </div>
-        <div class="category-item text-center" data-category="Depilação">
-          <div class="icon-circle shadow"><i class="bi bi-gender-female"></i></div>
-          <p>Depilação</p>
-        </div>
-        <div class="category-item text-center" data-category="Sobrancelhas">
-          <div class="icon-circle shadow"><i class="bi bi-eye"></i></div>
-          <p>Sobrancelhas</p>
-        </div>
-        <div class="category-item text-center" data-category="Massagem">
-          <div class="icon-circle shadow"><i class="bi bi-person-hearts"></i></div>
-          <p>Massagem</p>
-        </div>
-        <div class="category-item text-center" data-category="Rosto">
-          <div class="icon-circle shadow"><i class="bi bi-person-fill"></i></div>
-          <p>Rosto</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TRATAMENTOS POPULARES -->
-  <section class="treatments">
-    <div class="container">
-      <div class="section-heading text-center">
-        <span class="section-eyebrow">Populares</span>
-        <h2 class="section-title">Tratamentos em alta</h2>
-        <p class="section-sub">Os serviços mais agendados pela nossa comunidade.</p>
-      </div>
-
-      <div class="row g-3 g-md-4">
-        <div class="col-6 col-md-4 col-lg-2">
-          <a href="#destaques" class="treatment-card">
-            <div class="treatment-icon" style="background:#F4EBFF"><i class="bi bi-scissors"></i></div>
-            <div class="treatment-name">Corte &amp; Escova</div>
-            <div class="treatment-price">a partir de <strong>R$ 80</strong></div>
-          </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-          <a href="#destaques" class="treatment-card">
-            <div class="treatment-icon" style="background:#FFF1F2"><i class="bi bi-hand-index-thumb"></i></div>
-            <div class="treatment-name">Manicure &amp; Pedicure</div>
-            <div class="treatment-price">a partir de <strong>R$ 45</strong></div>
-          </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-          <a href="#destaques" class="treatment-card">
-            <div class="treatment-icon" style="background:#FEF3C7"><i class="bi bi-sun"></i></div>
-            <div class="treatment-name">Limpeza de Pele</div>
-            <div class="treatment-price">a partir de <strong>R$ 150</strong></div>
-          </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-          <a href="#destaques" class="treatment-card">
-            <div class="treatment-icon" style="background:#E0F2FE"><i class="bi bi-eye"></i></div>
-            <div class="treatment-name">Design de Sobrancelhas</div>
-            <div class="treatment-price">a partir de <strong>R$ 60</strong></div>
-          </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-          <a href="#destaques" class="treatment-card">
-            <div class="treatment-icon" style="background:#DCFCE7"><i class="bi bi-gender-female"></i></div>
-            <div class="treatment-name">Depilação a Laser</div>
-            <div class="treatment-price">a partir de <strong>R$ 120</strong></div>
-          </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-          <a href="#destaques" class="treatment-card">
-            <div class="treatment-icon" style="background:#FCE7F3"><i class="bi bi-person-hearts"></i></div>
-            <div class="treatment-name">Massagem Relaxante</div>
-            <div class="treatment-price">a partir de <strong>R$ 180</strong></div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Cards com Salões e Clínicas -->
-  <section id="destaques" class="listings">
-    <div class="container">
-      <div class="section-heading d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
-        <div>
-          <span class="section-eyebrow">Em destaque</span>
-          <h2 class="section-title mb-1">Salões &amp; Clínicas selecionados</h2>
-          <p class="section-sub mb-0">Parceiros verificados, avaliados pela nossa comunidade.</p>
-        </div>
-        <a href="#mapa-section" class="btn btn-outline-onde btn-sm d-none d-md-inline-flex align-items-center gap-2">
-          Ver no mapa <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
-
-      <div class="row g-4 listings-row">
-
-        <div class="col-10 col-md-6 col-lg-4 card-salao" data-index="0">
-          <div class="card service-card h-100">
-            <div class="service-card-media">
-              <img src="https://frizzar.com.br/blog/wp-content/uploads/2025/01/salao-de-beleza-moderno.webp" alt="Studio Bella Donna">
-              <span class="service-card-badge"><i class="bi bi-patch-check-fill"></i> Verificado</span>
-            </div>
-            <div class="card-body d-flex flex-column">
-              <div class="d-flex justify-content-between align-items-start mb-1">
-                <h5 class="card-title mb-0">Studio Bella Donna</h5>
-                <span class="service-card-rating">
-                  <i class="bi bi-star-fill"></i> 4.8
-                </span>
-              </div>
-              <p class="service-card-distance mb-2"><i class="bi bi-geo-alt"></i> 220 m de você</p>
-              <p class="card-text text-muted mb-3">Cabelo • Unhas • Sobrancelhas</p>
-              <div class="services-list mb-3">
-                <p><span>Corte Feminino</span><span class="price">R$ 120</span></p>
-                <p><span>Manicure Simples</span><span class="price">R$ 35</span></p>
-              </div>
-              <div class="mt-auto">
-                <button class="btn btn-primary-onde w-100 rounded-pill">
-                  <i class="bi bi-calendar2-heart"></i> Agendar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-10 col-md-6 col-lg-4 card-salao" data-index="1">
-          <div class="card service-card h-100">
-            <div class="service-card-media">
-              <img src="https://s2.glbimg.com/Ha2q-YYa3pCWtwM4E51zi_p-POI=/940x523/e.glbimg.com/og/ed/f/original/2019/02/20/blow-dry-bar-del-mar-chairs-counter-853427.jpg" alt="Clínica Estética Flores">
-              <span class="service-card-badge"><i class="bi bi-patch-check-fill"></i> Verificado</span>
-            </div>
-            <div class="card-body d-flex flex-column">
-              <div class="d-flex justify-content-between align-items-start mb-1">
-                <h5 class="card-title mb-0">Clínica Estética Flores</h5>
-                <span class="service-card-rating">
-                  <i class="bi bi-star-fill"></i> 4.9
-                </span>
-              </div>
-              <p class="service-card-distance mb-2"><i class="bi bi-geo-alt"></i> 1,1 km de você</p>
-              <p class="card-text text-muted mb-3">Rosto • Depilação • Massagem</p>
-              <div class="services-list mb-3">
-                <p><span>Limpeza de Pele</span><span class="price">R$ 150</span></p>
-                <p><span>Drenagem Linfática</span><span class="price">R$ 180</span></p>
-              </div>
-              <div class="mt-auto">
-                <button class="btn btn-primary-onde w-100 rounded-pill">
-                  <i class="bi bi-calendar2-heart"></i> Agendar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-10 col-md-6 col-lg-4 card-salao" data-index="2">
-          <div class="card service-card h-100">
-            <div class="service-card-media">
-              <img src="https://ferrante.com.br/wp-content/uploads/2024/11/decoracao-minimalista-salao.jpg.jpeg" alt="Espaço Glow">
-              <span class="service-card-badge"><i class="bi bi-patch-check-fill"></i> Verificado</span>
-            </div>
-            <div class="card-body d-flex flex-column">
-              <div class="d-flex justify-content-between align-items-start mb-1">
-                <h5 class="card-title mb-0">Espaço Glow</h5>
-                <span class="service-card-rating">
-                  <i class="bi bi-star-fill"></i> 4.7
-                </span>
-              </div>
-              <p class="service-card-distance mb-2"><i class="bi bi-geo-alt"></i> 500 m de você</p>
-              <p class="card-text text-muted mb-3">Unhas • Sobrancelhas • Rosto</p>
-              <div class="services-list mb-3">
-                <p><span>Design de Sobrancelhas</span><span class="price">R$ 60</span></p>
-                <p><span>Alongamento em Gel</span><span class="price">R$ 160</span></p>
-              </div>
-              <div class="mt-auto">
-                <button class="btn btn-primary-onde w-100 rounded-pill">
-                  <i class="bi bi-calendar2-heart"></i> Agendar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- COMO FUNCIONA -->
-  <section id="como-funciona" class="how-it-works">
-    <div class="container">
-      <div class="section-heading text-center">
-        <span class="section-eyebrow">Simples assim</span>
-        <h2 class="section-title">Como funciona</h2>
-        <p class="section-sub">Três passos para cuidar de você.</p>
-      </div>
-
+  <!-- ========== GRID DE PRODUTOS (produto-first, estilo Airbnb) ========== -->
+  <main class="listings ot-grid-wrap">
+    <div class="ot-grid-container">
       <div class="row g-4">
-        <div class="col-md-4">
-          <div class="how-step">
-            <div class="how-step-num">1</div>
-            <div class="how-step-icon"><i class="bi bi-search"></i></div>
-            <h5>Descubra</h5>
-            <p>Busque por serviço ou categoria e veja profissionais perto de você.</p>
-          </div>
+
+        <!-- Card 0 -->
+        <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 card-salao" data-index="0">
+          <article class="card service-card ot-card">
+            <div class="ot-card-media">
+              <img src="https://frizzar.com.br/blog/wp-content/uploads/2025/01/salao-de-beleza-moderno.webp" alt="Studio Bella Donna">
+              <button class="ot-fav" type="button" aria-label="Favoritar">
+                <i class="bi bi-heart"></i>
+              </button>
+              <span class="ot-badge">Verificado</span>
+            </div>
+            <div class="card-body ot-card-body">
+              <div class="ot-card-row">
+                <h5 class="card-title">Studio Bella Donna</h5>
+                <span class="ot-rating"><i class="bi bi-star-fill"></i> 4.8</span>
+              </div>
+              <p class="card-text ot-card-loc">Saquarema, RJ · 220 m</p>
+              <p class="card-text ot-card-tags">Cabelo · Unhas · Sobrancelhas</p>
+              <div class="ot-card-footer">
+                <p class="ot-card-price"><strong>R$ 35</strong> <span>a partir de</span></p>
+                <button class="btn btn-danger rounded-pill">Agendar</button>
+              </div>
+            </div>
+          </article>
         </div>
-        <div class="col-md-4">
-          <div class="how-step">
-            <div class="how-step-num">2</div>
-            <div class="how-step-icon"><i class="bi bi-calendar2-check"></i></div>
-            <h5>Agende</h5>
-            <p>Escolha dia, horário e finalize com Pix ou cartão de crédito — 100% seguro.</p>
-          </div>
+
+        <!-- Card 1 -->
+        <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 card-salao" data-index="1">
+          <article class="card service-card ot-card">
+            <div class="ot-card-media">
+              <img src="https://s2.glbimg.com/Ha2q-YYa3pCWtwM4E51zi_p-POI=/940x523/e.glbimg.com/og/ed/f/original/2019/02/20/blow-dry-bar-del-mar-chairs-counter-853427.jpg" alt="Clínica Estética Flores">
+              <button class="ot-fav" type="button" aria-label="Favoritar">
+                <i class="bi bi-heart"></i>
+              </button>
+              <span class="ot-badge ot-badge-top">Top avaliado</span>
+            </div>
+            <div class="card-body ot-card-body">
+              <div class="ot-card-row">
+                <h5 class="card-title">Clínica Estética Flores</h5>
+                <span class="ot-rating"><i class="bi bi-star-fill"></i> 4.9</span>
+              </div>
+              <p class="card-text ot-card-loc">Saquarema, RJ · 1,1 km</p>
+              <p class="card-text ot-card-tags">Rosto · Depilação · Massagem</p>
+              <div class="ot-card-footer">
+                <p class="ot-card-price"><strong>R$ 150</strong> <span>a partir de</span></p>
+                <button class="btn btn-danger rounded-pill">Agendar</button>
+              </div>
+            </div>
+          </article>
         </div>
-        <div class="col-md-4">
-          <div class="how-step">
-            <div class="how-step-num">3</div>
-            <div class="how-step-icon"><i class="bi bi-heart"></i></div>
-            <h5>Aproveite</h5>
-            <p>Receba lembretes, vá até o local e cuide do seu bem-estar.</p>
-          </div>
+
+        <!-- Card 2 -->
+        <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 card-salao" data-index="2">
+          <article class="card service-card ot-card">
+            <div class="ot-card-media">
+              <img src="https://ferrante.com.br/wp-content/uploads/2024/11/decoracao-minimalista-salao.jpg.jpeg" alt="Espaço Glow">
+              <button class="ot-fav" type="button" aria-label="Favoritar">
+                <i class="bi bi-heart"></i>
+              </button>
+            </div>
+            <div class="card-body ot-card-body">
+              <div class="ot-card-row">
+                <h5 class="card-title">Espaço Glow</h5>
+                <span class="ot-rating"><i class="bi bi-star-fill"></i> 4.7</span>
+              </div>
+              <p class="card-text ot-card-loc">Saquarema, RJ · 500 m</p>
+              <p class="card-text ot-card-tags">Unhas · Sobrancelhas · Rosto</p>
+              <div class="ot-card-footer">
+                <p class="ot-card-price"><strong>R$ 60</strong> <span>a partir de</span></p>
+                <button class="btn btn-danger rounded-pill">Agendar</button>
+              </div>
+            </div>
+          </article>
         </div>
+
       </div>
     </div>
-  </section>
+  </main>
 
-  <!-- MAPA -->
-  <section id="mapa-section" class="map-section">
-    <div class="container">
-      <div class="section-heading text-center">
-        <span class="section-eyebrow">No mapa</span>
-        <h2 class="section-title">Estabelecimentos perto de você</h2>
-        <p class="section-sub">Permita o acesso à sua localização para ver as distâncias.</p>
+  <!-- ========== SEÇÃO DO MAPA (colapsável, estilo "Mostrar no mapa" do Airbnb) ========== -->
+  <section class="ot-map-section">
+    <div class="ot-map-header">
+      <div>
+        <h2>Salões perto de você</h2>
+        <p class="text-muted mb-0">Marcadores mostram estabelecimentos em destaque e empresas cadastradas.</p>
       </div>
+      <button id="btnToggleMapa" type="button" class="btn btn-dark rounded-pill">
+        <i class="bi bi-map"></i> <span>Ocultar mapa</span>
+      </button>
+    </div>
+    <div id="mapaWrapper" class="ot-map-wrapper">
       <div id="map"></div>
     </div>
   </section>
 
-  <!-- CTA EMPRESAS -->
-  <section class="cta-empresas">
-    <div class="container">
-      <div class="cta-empresas-box row align-items-center g-4">
-        <div class="col-md-8">
-          <span class="section-eyebrow">Para empresas</span>
-          <h2 class="cta-empresas-title">Tem um salão, clínica ou é profissional autônomo?</h2>
-          <p class="cta-empresas-text">
-            Cadastre-se gratuitamente, ganhe visibilidade para clientes da sua região
-            e receba agendamentos com pagamento já confirmado.
-          </p>
-        </div>
-        <div class="col-md-4 text-md-end">
-          <a href="cadastro-empresa.html" class="btn btn-primary-onde btn-lg">
-            <i class="bi bi-shop-window"></i> Cadastrar meu negócio
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <div class="container">
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="logo d-flex align-items-center mb-3">
-            <span class="logo-badge">O</span>
-            <span class="logo-text">
-              <span class="logo-title">Onde tem<span class="logo-dot">?</span></span>
-              <span class="logo-sub">Beleza &amp; bem-estar</span>
-            </span>
-          </div>
-          <p class="footer-about">
-            A forma mais simples de encontrar e agendar serviços de beleza e bem-estar
-            perto de você, com profissionais verificados e pagamento seguro.
-          </p>
-          <div class="footer-social">
-            <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-            <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-            <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-            <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
-          </div>
-        </div>
-        <div class="col-6 col-md-2">
-          <h6>Empresa</h6>
-          <ul>
-            <li><a href="#como-funciona">Como funciona</a></li>
-            <li><a href="#categorias">Serviços</a></li>
-            <li><a href="#destaques">Estabelecimentos</a></li>
-          </ul>
-        </div>
-        <div class="col-6 col-md-3">
-          <h6>Para você</h6>
-          <ul>
-            <li><a href="login.html">Entrar</a></li>
-            <li><a href="cadastro-usuario.html">Criar conta</a></li>
-            <li><a href="agendamentos.html">Meus agendamentos</a></li>
-          </ul>
-        </div>
-        <div class="col-6 col-md-3">
-          <h6>Para seu negócio</h6>
-          <ul>
-            <li><a href="cadastro-empresa.html">Cadastrar empresa</a></li>
-            <li><a href="login.html">Área do parceiro</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© <span id="footer-year">2025</span> Onde tem? • Todos os direitos reservados</span>
-        <span class="footer-tag"><i class="bi bi-shield-check"></i> Pagamento seguro • Pix e cartão</span>
-      </div>
-    </div>
-  </footer>
+  <!-- ========== MODAIS (mantidos sem mudança de IDs) ========== -->
 
   <!-- Modal exibido quando o usuário tenta agendar sem estar logado -->
   <div class="modal fade" id="modalLoginNecessario" tabindex="-1" aria-labelledby="modalLoginNecessarioLabel" aria-hidden="true">
@@ -494,7 +224,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modalLoginNecessarioLabel">
-            <i class="bi bi-person-lock me-2"></i>Login necessário
+            <i class="bi bi-person-lock me-2 text-danger"></i>Login necessário
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
@@ -504,10 +234,10 @@
         </div>
         <div class="modal-footer d-flex flex-column flex-sm-row gap-2">
           <button type="button" class="btn btn-outline-secondary w-100 w-sm-auto" data-bs-dismiss="modal">Agora não</button>
-          <a class="btn btn-outline-onde w-100 w-sm-auto" href="cadastro-usuario.html">
+          <a class="btn btn-outline-danger w-100 w-sm-auto" href="cadastro-usuario.html">
             <i class="bi bi-person-plus"></i> Cadastrar-se
           </a>
-          <a id="btnIrLogin" class="btn btn-primary-onde w-100 w-sm-auto" href="login.html">
+          <a id="btnIrLogin" class="btn btn-danger w-100 w-sm-auto" href="login.html">
             <i class="bi bi-box-arrow-in-right"></i> Fazer login
           </a>
         </div>
@@ -595,7 +325,7 @@
             <!-- Bloco dinâmico: Pix -->
             <div id="blocoPix" class="border rounded p-3 mb-3 bg-light text-center" hidden>
               <div id="pixInicial">
-                <i class="bi bi-qr-code fs-1"></i>
+                <i class="bi bi-qr-code fs-1 text-danger"></i>
                 <p class="small text-muted mb-0">Ao confirmar, geraremos uma cobrança Pix simulada com QR Code e código "copia e cola".</p>
               </div>
               <div id="pixCobranca" hidden>
@@ -614,21 +344,21 @@
 
             <hr>
             <div id="statusPagamento" class="text-center small mb-2"></div>
-            <button type="submit" class="btn btn-primary-onde w-100 rounded-pill" id="btnConfirmarPagamento">Confirmar e Pagar</button>
+            <button type="submit" class="btn btn-danger w-100 rounded-pill" id="btnConfirmarPagamento">Confirmar e Pagar</button>
           </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Barra de navegação mobile -->
+  <!-- ========== BOTTOM-NAV MOBILE ========== -->
   <nav class="fixed-bottom bg-white d-md-none border-top py-2 bottom-nav">
     <div class="container-fluid d-flex justify-content-around text-center">
-      <a href="index.html" class="nav-link-custom active">
+      <a href="index.html" class="nav-link-custom text-danger">
         <i class="bi bi-house-door-fill fs-4"></i>
         <span class="small d-block">Início</span>
       </a>
-      <a href="#categorias" class="nav-link-custom text-muted">
+      <a href="#" class="nav-link-custom text-muted">
         <i class="bi bi-search fs-4"></i>
         <span class="small d-block">Buscar</span>
       </a>
@@ -643,14 +373,28 @@
     </div>
   </nav>
 
-  <script>
-    document.getElementById('footer-year').textContent = new Date().getFullYear();
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="auth-guard.js"></script>
   <script src="config.js"></script>
   <script src="utils.js"></script>
   <script src="script.js"></script>
   <script src="app.js"></script>
+
+  <!-- Toggle do mapa (apenas UI, não mexe em script.js) -->
+  <script>
+    (function () {
+      const btn = document.getElementById('btnToggleMapa');
+      const wrapper = document.getElementById('mapaWrapper');
+      if (!btn || !wrapper) return;
+      btn.addEventListener('click', () => {
+        const hidden = wrapper.classList.toggle('is-hidden');
+        btn.querySelector('span').textContent = hidden ? 'Mostrar mapa' : 'Ocultar mapa';
+        if (!hidden && typeof mapaInstancia !== 'undefined' && mapaInstancia && typeof mapaInstancia.invalidateSize === 'function') {
+          setTimeout(() => mapaInstancia.invalidateSize(), 150);
+        }
+      });
+    })();
+  </script>
+  <script src="chat-widget.js"></script>
 </body>
 </html>

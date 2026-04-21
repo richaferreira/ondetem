@@ -47,5 +47,44 @@ window.OndeTemAuth = (function () {
         return res;
     }
 
-    return { salvarSessao, obterToken, obterUsuario, logout, exigirLogin, api };
+    /** Rota do painel principal para cada tipo de usuário logado. */
+    function destinoDoPainel(usuario) {
+        if (!usuario) return '/login';
+        if (usuario.tipo === 'admin') return '/admin';
+        if (usuario.tipo === 'empresa') return '/painel-empresa';
+        return '/agendamentos';
+    }
+
+    /**
+     * Aponta todos os elementos marcados como link de perfil/usuário para
+     * o painel correto de acordo com a sessão atual. Quando o visitante
+     * não está logado, mantém o destino padrão (/login). Aplica-se a
+     * `[data-ot-user-link]` e a seletores legados (`.ot-user-btn`,
+     * `.bottom-nav a[href$="login.html"] i.bi-person`) presentes nas
+     * páginas atuais.
+     */
+    function atualizarLinksDeUsuario(raiz) {
+        const destino = destinoDoPainel(obterUsuario());
+        const escopo = raiz || document;
+        const selecao = new Set();
+        escopo.querySelectorAll('[data-ot-user-link]').forEach(el => selecao.add(el));
+        escopo.querySelectorAll('.ot-user-btn').forEach(el => selecao.add(el));
+        escopo.querySelectorAll('.bottom-nav a').forEach(a => {
+            if (a.querySelector('i.bi-person')) selecao.add(a);
+        });
+        selecao.forEach(a => { if (a && 'href' in a) a.setAttribute('href', destino); });
+    }
+
+    if (typeof document !== 'undefined') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => atualizarLinksDeUsuario());
+        } else {
+            atualizarLinksDeUsuario();
+        }
+    }
+
+    return {
+        salvarSessao, obterToken, obterUsuario, logout, exigirLogin, api,
+        destinoDoPainel, atualizarLinksDeUsuario,
+    };
 })();
